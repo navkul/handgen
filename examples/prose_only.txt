@@ -1,0 +1,3 @@
+Assume the sequence is increasing.
+Then each later term is at least as large as the one before it.
+Therefore the claim follows.
