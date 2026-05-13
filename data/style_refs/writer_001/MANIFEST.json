@@ -1,0 +1,36 @@
+{
+  "writer_id": "writer_001",
+  "selection_policy": "top selected natural_prose DiffBrush style-pack lines only; excludes math/alphabet/repeated worksheet crops",
+  "references": [
+    {
+      "path": "data/style_refs/writer_001/natural_prose_primary.png",
+      "sha256": "27347602f6519c3e5eab38a503ee834531d37b659f7b053f772947c61dfed3cd",
+      "source_path": "../01_style_memory/artifacts/diffbrush_style_pack/diffbrush_style_path/writer_001/sel002_rank004_score0.845_natural_prose__natural_prose__Lecture_Reading_Notes__p010__line011.png",
+      "source_name": "sel002_rank004_score0.845_natural_prose__natural_prose__Lecture_Reading_Notes__p010__line011.png"
+    },
+    {
+      "path": "data/style_refs/writer_001/natural_prose_alt01.png",
+      "sha256": "fc37d685134ec9e9cf7693e064c1cddee9db674b4c821282465a46c264d70675",
+      "source_path": "../01_style_memory/artifacts/diffbrush_style_pack/diffbrush_style_path/writer_001/sel003_rank006_score0.836_natural_prose__natural_prose__Lecture_Reading_Notes__p006__line000.png",
+      "source_name": "sel003_rank006_score0.836_natural_prose__natural_prose__Lecture_Reading_Notes__p006__line000.png"
+    },
+    {
+      "path": "data/style_refs/writer_001/natural_prose_alt02.png",
+      "sha256": "752753825f99697a9c80ca67077b8fab5043ea329992006a795095f50ba32130",
+      "source_path": "../01_style_memory/artifacts/diffbrush_style_pack/diffbrush_style_path/writer_001/sel005_rank011_score0.826_natural_prose__natural_prose__Lecture_Reading_Notes__p004__line007.png",
+      "source_name": "sel005_rank011_score0.826_natural_prose__natural_prose__Lecture_Reading_Notes__p004__line007.png"
+    },
+    {
+      "path": "data/style_refs/writer_001/natural_prose_alt03.png",
+      "sha256": "71fd46ff179291aad0e516bdd81601b61106bd4c41c615d6e6e72e2c681cf852",
+      "source_path": "../01_style_memory/artifacts/diffbrush_style_pack/diffbrush_style_path/writer_001/sel006_rank012_score0.825_natural_prose__natural_prose__Lecture_Reading_Notes__p007__line004.png",
+      "source_name": "sel006_rank012_score0.825_natural_prose__natural_prose__Lecture_Reading_Notes__p007__line004.png"
+    },
+    {
+      "path": "data/style_refs/writer_001/natural_prose_alt04.png",
+      "sha256": "c21c2dceab574e6882869216d8165b7c5249195af2fc1441b96ff8e22b29e141",
+      "source_path": "../01_style_memory/artifacts/diffbrush_style_pack/diffbrush_style_path/writer_001/sel007_rank013_score0.825_natural_prose__natural_prose__Lecture_Reading_Notes__p010__line012.png",
+      "source_name": "sel007_rank013_score0.825_natural_prose__natural_prose__Lecture_Reading_Notes__p010__line012.png"
+    }
+  ]
+}

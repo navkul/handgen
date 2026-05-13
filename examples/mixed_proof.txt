@@ -1,0 +1,4 @@
+Pick numbers with [[0 < a < b]]
+Choose a positive offset [[c > 0]]
+Adding the offset gives [[a + c < b + c]]
+so the order remains unchanged.

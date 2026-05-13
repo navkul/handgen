@@ -1,0 +1,24 @@
+[project]
+name = "handgen"
+version = "0.1.0"
+description = "Local-first handwriting document generator MVP using DiffBrush prose and worksheet glyph-bank math."
+requires-python = ">=3.11"
+dependencies = [
+  "numpy>=1.26",
+  "pillow>=10",
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=8",
+]
+
+[project.scripts]
+handgen = "handgen.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["handgen*"]
