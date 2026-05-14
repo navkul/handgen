@@ -6,6 +6,14 @@ import sys
 from pathlib import Path
 
 from . import db
+from .eval.harness import (
+    CARRIER_PROMPT_BENCHMARKS,
+    PLACEHOLDER_BENCHMARK_TEMPLATES,
+    PLACEHOLDER_BENCHMARK_WORDS,
+    render_carrier_prompt_benchmark,
+    render_eval_suite,
+    render_placeholder_benchmark,
+)
 from .ingest.worksheet import ingest_worksheet
 from .paths import DATA_DIR
 from .render.document import render_document
@@ -104,6 +112,63 @@ def cmd_document_render(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_eval_render(args: argparse.Namespace) -> int:
+    source = Path(args.source).resolve() if args.source else None
+    if source is not None and not source.exists():
+        raise RuntimeError(f"eval source text not found: {source}")
+    metrics = render_eval_suite(
+        args.writer_id,
+        Path(args.out).resolve(),
+        source_path=source,
+        max_lines=args.max_lines,
+    )
+    print(f"metrics: {metrics['metrics_path']}")
+    print(f"contact_sheet: {metrics['contact_sheet']}")
+    print(f"png: {metrics['outputs'].get('png')}")
+    print(f"carrier_mean_ocr_score: {metrics.get('carrier_mean_ocr_score')}")
+    print(f"quality_gates: {metrics.get('quality_gates')}")
+    print(f"warnings: {metrics.get('warning_codes')}")
+    return 0
+
+
+def cmd_eval_placeholders(args: argparse.Namespace) -> int:
+    placeholders = tuple(args.placeholders.split(",")) if args.placeholders else PLACEHOLDER_BENCHMARK_WORDS
+    if args.template_limit is None:
+        templates = PLACEHOLDER_BENCHMARK_TEMPLATES
+    else:
+        templates = PLACEHOLDER_BENCHMARK_TEMPLATES[: args.template_limit]
+    metrics = render_placeholder_benchmark(
+        args.writer_id,
+        Path(args.out).resolve(),
+        placeholders=placeholders,
+        templates=templates,
+        seeds=args.seeds,
+    )
+    print(f"metrics: {metrics['metrics_path']}")
+    print(f"contact_sheet: {metrics['contact_sheet']}")
+    print(f"placeholder_policy: {metrics['placeholder_policy']}")
+    print(f"recommended_placeholder_order: {metrics['recommended_placeholder_order']}")
+    return 0
+
+
+def cmd_eval_carrier_prompts(args: argparse.Namespace) -> int:
+    placeholders = tuple(args.placeholders.split(",")) if args.placeholders else ("number",)
+    contexts = tuple(args.contexts.split(",")) if args.contexts else None
+    metrics = render_carrier_prompt_benchmark(
+        args.writer_id,
+        Path(args.out).resolve(),
+        placeholders=placeholders,
+        contexts=contexts,
+        seeds=args.seeds,
+        top_k=args.top_k,
+    )
+    print(f"metrics: {metrics['metrics_path']}")
+    print(f"contact_sheet: {metrics['contact_sheet']}")
+    print(f"carrier_prompt_policy: {metrics['carrier_prompt_policy']}")
+    print(f"contexts: {metrics['contexts']}")
+    return 0
+
+
 def write_summary(manifest: dict) -> str:
     summary = {
         "svg": manifest["outputs"]["svg"],
@@ -148,9 +213,33 @@ def build_parser() -> argparse.ArgumentParser:
     doc_render.add_argument("writer_id")
     doc_render.add_argument("source")
     doc_render.add_argument("--out", required=True)
-    doc_render.add_argument("--max-words", type=int, default=6)
+    doc_render.add_argument("--max-words", type=int, default=6, help="Deprecated for carrier rendering; kept for prose-only chunking.")
     doc_render.add_argument("--max-chars", type=int)
     doc_render.set_defaults(func=cmd_document_render)
+
+    eval_p = sub.add_parser("eval")
+    eval_sub = eval_p.add_subparsers(dest="eval_cmd", required=True)
+    eval_render = eval_sub.add_parser("render")
+    eval_render.add_argument("writer_id")
+    eval_render.add_argument("--out", required=True)
+    eval_render.add_argument("--source")
+    eval_render.add_argument("--max-lines", type=int, default=10)
+    eval_render.set_defaults(func=cmd_eval_render)
+    eval_placeholders = eval_sub.add_parser("placeholders")
+    eval_placeholders.add_argument("writer_id")
+    eval_placeholders.add_argument("--out", required=True)
+    eval_placeholders.add_argument("--seeds", type=int, default=2)
+    eval_placeholders.add_argument("--template-limit", type=int)
+    eval_placeholders.add_argument("--placeholders", help="Comma-separated placeholder words to benchmark.")
+    eval_placeholders.set_defaults(func=cmd_eval_placeholders)
+    eval_carrier_prompts = eval_sub.add_parser("carrier-prompts")
+    eval_carrier_prompts.add_argument("writer_id")
+    eval_carrier_prompts.add_argument("--out", required=True)
+    eval_carrier_prompts.add_argument("--seeds", type=int, default=1)
+    eval_carrier_prompts.add_argument("--top-k", type=int, default=3)
+    eval_carrier_prompts.add_argument("--placeholders", help="Comma-separated placeholder words to benchmark.")
+    eval_carrier_prompts.add_argument("--contexts", help=f"Comma-separated contexts. Available: {','.join(CARRIER_PROMPT_BENCHMARKS)}")
+    eval_carrier_prompts.set_defaults(func=cmd_eval_carrier_prompts)
     return parser
 
 

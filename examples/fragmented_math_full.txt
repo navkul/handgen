@@ -1,0 +1,4 @@
+Prove that x + y is odd.
+If x is true, then y is false.
+Let a = 6. Then a must be even.
+There exists a number that is prime.

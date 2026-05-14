@@ -20,11 +20,13 @@ Implication: any commit that changes parsing, span routing, manifest line record
 
 DiffBrush can produce useful handwriting-like prose, but generated text can drift, repeat, omit, or add content. The MVP therefore treats DiffBrush output as candidates and uses OCR/text checks before composition where possible.
 
-Implication: visual quality improvements should not bypass source-locking checks unless the replacement verification strategy is documented.
+The current default generates four candidates per prompt variant. In a fresh benchmark of `examples/fragmented_math_full.txt` with `DIFFBRUSH_STEPS=20` and no last-resort retries, one candidate took `17.78s` wall time while four candidates took `42.09s`. That is about `2.37x` slower for this document. Candidate search can improve the selected line, but OCR still sees some low-quality lines, so higher candidate counts are a quality/runtime knob rather than a correctness guarantee.
+
+Implication: visual quality improvements should not bypass source-locking checks unless the replacement verification strategy is documented. Candidate-count changes should be benchmarked because they directly trade runtime for selection quality.
 
 ### Raw DiffBrush math is not trusted as exact math
 
-Math symbols need exact source preservation. The MVP routes symbols through worksheet glyph-bank composition and uses DiffBrush only for prose-like or isolated variable components where appropriate.
+Math symbols need exact source preservation. The MVP routes ASCII letters, Greek, operators, relation symbols, and punctuation through worksheet glyph-bank composition. Digits still use isolated DiffBrush components for now and are recorded as a known limit in render manifests.
 
 Implication: math rendering changes should preserve token-level source metadata and avoid relying on unconstrained generated math text.
 
