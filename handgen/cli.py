@@ -68,6 +68,16 @@ def cmd_worksheet_ingest(args: argparse.Namespace) -> int:
     manifest = ingest_worksheet(args.writer_id, source, out_dir, dpi=args.dpi)
     manifest_path = out_dir / "manifest.json"
     with db.connect() as con:
+        prior_ids = [
+            row[0]
+            for row in con.execute(
+                "SELECT id FROM worksheets WHERE writer_id = ?", (args.writer_id,)
+            ).fetchall()
+        ]
+        if prior_ids:
+            placeholders = ",".join("?" for _ in prior_ids)
+            con.execute(f"DELETE FROM glyphs WHERE worksheet_id IN ({placeholders})", prior_ids)
+            con.execute(f"DELETE FROM worksheets WHERE id IN ({placeholders})", prior_ids)
         con.execute(
             "INSERT INTO worksheets(writer_id, source_path, manifest_path, created_at) VALUES (?, ?, ?, ?)",
             (args.writer_id, str(source), str(manifest_path), now_iso()),

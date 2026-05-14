@@ -15,6 +15,12 @@ This folder is a staging repo inside the research workspace. Once the basic flow
 
 ## Quick Start
 
+Install system dependencies. `tesseract` is required by the OCR verifier that gates every prose candidate; `rsvg-convert` (from `librsvg`) rasterizes the canonical SVG to PNG.
+
+```bash
+brew install tesseract librsvg
+```
+
 Create a repo-local virtual environment:
 
 ```bash

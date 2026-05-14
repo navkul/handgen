@@ -802,10 +802,26 @@ def render_document(
         worksheet_manifest: dict[str, Any] | None = None
         if math_needed:
             if worksheet is None:
+                stale_rows = con.execute(
+                    "SELECT source_path, manifest_path FROM worksheets WHERE writer_id = ?",
+                    (writer_id,),
+                ).fetchall()
+                if stale_rows:
+                    message = (
+                        f"writer {writer_id!r} has worksheet rows in the DB but their manifest files are missing on disk; "
+                        "the worksheet was likely renamed or removed by an upstream change."
+                    )
+                    action = (
+                        f"Re-run `handgen worksheet ingest {writer_id} <path/to/worksheet.png>` "
+                        "against the current worksheet PNG to refresh the registration."
+                    )
+                else:
+                    message = "Input contains math spans but no worksheet glyph bank has been ingested."
+                    action = f"Run `handgen worksheet ingest {writer_id} /path/to/worksheet.png` and render again."
                 warning = {
                     "code": "missing_symbol_bank",
-                    "message": "Input contains math spans but no worksheet glyph bank has been ingested.",
-                    "action": "Run `handgen worksheet ingest writer_001 /path/to/worksheet.pdf` and render again.",
+                    "message": message,
+                    "action": action,
                 }
                 warnings.append(warning)
                 write_json(out_dir / "warnings.json", warnings)
