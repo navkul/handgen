@@ -1,18 +1,18 @@
 # Model Weights
 
-Do not commit DiffBrush weights into this product repo.
-
-For this staging MVP, the default model path points at the existing research checkout:
+The current local default points at the vendored DiffBrush copy under this repo:
 
 ```text
-../04_cpu_neural_scout/vendor/DiffBrush/model_zoo/DiffBrush-ckpt.pt
+models/diffbrush/third_party_repo/model_zoo/DiffBrush-ckpt.pt
 ```
 
-When this folder becomes a standalone repo, keep weights outside Git and provide the path through:
+`handgen` calls DiffBrush in-process through `handgen/diffbrush/runner.py`, which builds the model once per `document render` and reuses it across every prose chunk and variable in that render.
+
+If you want to use a different checkout or keep weights outside this repo, override the paths through:
 
 ```bash
 export DIFFBRUSH_ROOT=/path/to/DiffBrush
 export DIFFBRUSH_CHECKPOINT=/path/to/DiffBrush-ckpt.pt
-export DIFFBRUSH_RUNNER=/path/to/run_diffbrush_single.py
-export DIFFBRUSH_PYTHON=/path/to/python
+export DIFFBRUSH_DEVICE=auto   # or 'cpu' / 'mps'
+export DIFFBRUSH_STEPS=20      # DDIM sampling steps
 ```

@@ -28,6 +28,12 @@ Math symbols need exact source preservation. The MVP routes symbols through work
 
 Implication: math rendering changes should preserve token-level source metadata and avoid relying on unconstrained generated math text.
 
+### DiffBrush is now loaded once per render, not once per chunk
+
+Earlier the renderer spawned a fresh Python subprocess for every prose chunk and variable, which paid a ~10s model-load cost on every call. The runner is now in-process: the model is built on the first call inside a `document render` and reused for every subsequent chunk and variable in that same render. On a 3-chunk prose test this drops the total from ~37s to ~10s (~3.75× faster end-to-end), with warm chunks at ~2s and the first chunk paying a one-time ~5–6s load.
+
+Implication: the speedup only applies within a single `document render` call. Running the CLI repeatedly (one call per document) still pays the load cost each time. If multi-document batching is needed, expose a callable that holds one `DiffBrushRunner` across documents.
+
 ### SVG is useful for debugging because composition remains inspectable
 
 The SVG output keeps embedded visual assets, positions, sizes, and document structure inspectable before PNG conversion. This fits the local-first MVP better than treating the final PNG as the only meaningful artifact.

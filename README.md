@@ -21,6 +21,7 @@ python3 -m handgen init
 python3 -m handgen writer create writer_001
 python3 -m handgen style add writer_001 data/style_refs/writer_001/natural_prose_primary.png
 python3 -m handgen document render writer_001 examples/prose_only.txt --out outputs/prose_only
+python3 -m handgen document render writer_001 examples/prose_only.txt --out outputs/prose_only_chars40 --max-chars 40
 ```
 
 Mixed prose/math rendering also requires a symbol worksheet. This worksheet should contain only digits, operators/punctuation, and Greek symbols; English letters come from the natural handwriting style reference.
@@ -80,22 +81,34 @@ python3 -m handgen worksheet ingest writer_002 data/worksheets/writer_002/symbol
 python3 -m handgen document render writer_002 examples/mixed_proof.txt --out outputs/writer_002_mixed_proof
 ```
 
+To evaluate shorter DiffBrush spans for content control, rerun the same source with different prose character cutoffs, for example:
+
+```bash
+python3 -m handgen document render writer_002 examples/mixed_proof.txt --out outputs/writer_002_chars40 --max-chars 40
+python3 -m handgen document render writer_002 examples/mixed_proof.txt --out outputs/writer_002_chars30 --max-chars 30
+python3 -m handgen document render writer_002 examples/mixed_proof.txt --out outputs/writer_002_chars20 --max-chars 20
+```
+
+This only changes prose chunking. The math route is unchanged: ASCII English variables inside `[[...]]` still use DiffBrush variable-context generation, while digits/Greek/operators still come from the worksheet glyph bank.
+
 Commit the writer's reusable PNG assets and worksheet-derived crop PNGs under `data/style_refs/<writer_id>/` and `data/worksheets/<writer_id>/`. Do not commit `data/handgen.sqlite3` or `outputs/`.
 
 ## Runtime Notes
 
-DiffBrush is loaded from the existing research checkout by default:
+DiffBrush is vendored into this repo by default:
 
-- `../04_cpu_neural_scout/vendor/DiffBrush`
-- `../04_cpu_neural_scout/vendor/DiffBrush/model_zoo/DiffBrush-ckpt.pt`
-- runner: `../04_cpu_neural_scout/code/run_diffbrush_single.py`
+- `models/diffbrush/third_party_repo/`
+- checkpoint: `models/diffbrush/third_party_repo/model_zoo/DiffBrush-ckpt.pt`
+- runner: `handgen/diffbrush/runner.py` (in-process), backed by `handgen/diffbrush/run_single.py`
 
 Override these with:
 
 - `DIFFBRUSH_ROOT`
 - `DIFFBRUSH_CHECKPOINT`
-- `DIFFBRUSH_RUNNER`
-- `DIFFBRUSH_PYTHON`
+- `DIFFBRUSH_DEVICE` (default `auto`; falls back from `mps` to `cpu` on failure)
+- `DIFFBRUSH_STEPS` (default `20` DDIM sampling steps)
+
+The DiffBrush model is loaded once per `document render` call and reused for every prose chunk and variable in that render. On a 3-chunk prose test this brings the per-call cost from ~12s down to ~2s after the first chunk (~3.75× faster end-to-end). The first chunk pays a one-time ~5–6s model-load cost.
 
 Generated files are intentionally ignored by Git:
 

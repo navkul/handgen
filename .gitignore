@@ -8,3 +8,10 @@ build/
 *.egg-info/
 outputs/
 data/*.sqlite3
+
+# Model weights — keep code reproducible but don't push the binaries
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin

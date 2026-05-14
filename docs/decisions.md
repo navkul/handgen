@@ -70,6 +70,16 @@ Tradeoff: Mixed rendering requires ink normalization, sizing rules, and route-sp
 
 Update rule: Revisit this entry when digit, Greek, operator, punctuation, or variable routing changes.
 
+## 2026-05-13: Run DiffBrush In-Process And Reuse Models Across Spans
+
+Decision: `handgen/diffbrush/runner.py` builds the DiffBrush model in-process on the first call inside a `document render` and reuses it for every prose chunk and variable in that render. No subprocess per chunk, no persistent daemon.
+
+Reason: The earlier subprocess-per-chunk path paid a ~10s model-load cost on every call. On a 3-chunk test, switching to in-process reuse brings the total from ~37s to ~10s (~3.75×) with warm chunks at ~2s. The pattern matches how the Autoscribe benchmark drives DiffBrush.
+
+Tradeoff: The host Python process now holds the model in memory (CPU or MPS) for the duration of a render, so it should not also import other large models concurrently. Speedup only applies within a single `document render` call — repeated CLI invocations still pay one model-load each.
+
+Update rule: Revisit this entry if rendering moves to a long-running server, batches multiple documents in one process, or if DiffBrush is replaced by a different prose model.
+
 ## 2026-05-14: Do Not Maintain A Changelog Yet
 
 Decision: The repo does not need a changelog while it is a local MVP staging repo without versioned releases or external users.

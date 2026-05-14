@@ -113,7 +113,7 @@ A render output directory may include:
 - `document.png`: PNG derivative.
 - `manifest.json`: machine-readable render manifest.
 - `source_contract_failed.json`: failure details when source preservation fails.
-- `diffbrush_runs/`: external model run inputs, outputs, and logs.
+- `diffbrush_runs/`: per-span DiffBrush inputs, outputs (`sample.png`), and `result.json`. One subdirectory per chunk or variable; all of them share the same in-memory model within a single render.
 - `prose/`, `prose_candidates/`, `variables/`, `math/`, `glyph_rgba/`: intermediate visual assets.
 - `logs/`: runtime logs and diagnostic output.
 
