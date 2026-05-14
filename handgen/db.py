@@ -123,10 +123,14 @@ def latest_style_ref(con: sqlite3.Connection, writer_id: str) -> sqlite3.Row | N
 
 
 def latest_worksheet(con: sqlite3.Connection, writer_id: str) -> sqlite3.Row | None:
-    return con.execute(
-        "SELECT * FROM worksheets WHERE writer_id = ? ORDER BY id DESC LIMIT 1",
+    rows = con.execute(
+        "SELECT * FROM worksheets WHERE writer_id = ? ORDER BY id DESC",
         (writer_id,),
-    ).fetchone()
+    ).fetchall()
+    for row in rows:
+        if Path(row["manifest_path"]).exists():
+            return row
+    return None
 
 
 def insert_artifact(con: sqlite3.Connection, job_id: int | None, kind: str, path: str, sha256: str | None = None) -> None:
