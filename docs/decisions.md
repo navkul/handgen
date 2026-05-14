@@ -80,6 +80,26 @@ Tradeoff: The host Python process now holds the model in memory (CPU or MPS) for
 
 Update rule: Revisit this entry if rendering moves to a long-running server, batches multiple documents in one process, or if DiffBrush is replaced by a different prose model.
 
+## 2026-05-14: Default Prose Chunking Is balanced_dp
+
+Decision: Every `handgen document render` of prose-only content uses the `balanced_dp` strategy from `handgen/chunking.py` by default. The legacy greedy `chunk_prose` chunker remains reachable only when `--max-chars` is explicitly passed, as an escape hatch.
+
+Reason: In a 5-sentence × 4-strategy benchmark on writer_002 (`outputs/chunking_compare/latest/`), `balanced_dp` eliminated OCR-detected word repeats and lifted average match score by ~33% versus the greedy baseline, mostly by avoiding the small orphan tail chunks (7–18 chars) that the greedy splitter emits at sentence ends. The result aligns with the IAM-line-shape finding in `docs/findings.md`: DiffBrush is most reliable when prompts cluster around ~42 characters.
+
+Tradeoff: `balanced_dp` is O(n²) in words rather than greedy O(n). At absolute scale that's ~27 µs vs ~13 µs per sentence — rounding error against the seconds-per-chunk diffusion sampling cost, so the change is effectively free. The `--max-words` CLI flag becomes a no-op for prose; documents that relied on it implicitly will now render with balanced_dp instead, which is the intended behavior change.
+
+Update rule: Revisit this entry when a new chunking strategy outperforms `balanced_dp` in the chunk_compare harness, or when the prose path is restructured to share `_chunk_carrier`'s slot-aware splitter.
+
+## 2026-05-14: Production DiffBrush Will Run As A Persistent GPU Service
+
+Decision: When Handgen moves off the local CLI, DiffBrush will run as a long-lived GPU server that keeps the model loaded in memory and accepts text + style-reference requests from the web app/backend. The MVP's in-process-per-render pattern will not be carried into production.
+
+Reason: Diffusion sampling dominates runtime (dozens of denoising UNet passes per chunk; see `docs/findings.md`). Reloading the model per request would pay the model-load cost on every job, and per-job VMs on cloud GPUs are wasteful when one warm process can serve many renders. A persistent service also enables candidate batching on CUDA (currently sequential — see the runner), which is a roughly 4× additional speedup on top of the GPU-versus-MPS gain.
+
+Tradeoff: A persistent GPU process is more operational complexity than the current CLI — health checks, GPU memory accounting, request queueing, and warm-pool management. It also pins one model version per process; rolling out a new DiffBrush checkpoint becomes a deploy event rather than a file swap.
+
+Update rule: Revisit this entry when work begins on a deployed runtime, or when a serverless / on-demand GPU approach is shown to match persistent-server latency for our workload.
+
 ## 2026-05-14: Do Not Maintain A Changelog Yet
 
 Decision: The repo does not need a changelog while it is a local MVP staging repo without versioned releases or external users.

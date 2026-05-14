@@ -103,6 +103,12 @@ The speed tradeoff is linear in generated candidates after the one-time model lo
 
 The prose route records evidence such as source text hashes, candidate metadata, OCR or estimated word boxes, selected artifact paths, and exactness information in the manifest.
 
+Prose chunking is configurable via `handgen/chunking.py`. Four strategies are available — `balanced_dp` (minimise squared deviation from a ~42-char target; **production default**), `current` (legacy greedy word-count, reachable only when `--max-chars` is set as an escape hatch), `punctuation_first` (split on `.`, `;`, `:`, `,` then rebalance), and `variable_length_sampling` (per-chunk targets sampled from `[35, 50]`). All strategies preserve whole words and target IAM-line-shaped chunks because DiffBrush is trained on that distribution (see `docs/findings.md`).
+
+By default, every `handgen document render` of prose-only content routes through `balanced_dp`. The `--max-words` flag is now a no-op for prose; `--max-chars` switches the prose pipeline to the legacy char-greedy chunker as an explicit escape hatch.
+
+`python -m handgen.eval.chunk_compare WRITER_ID --strategies current balanced_dp punctuation_first variable_length_sampling --out outputs/chunking_compare/latest` renders the same benchmark prose across all four strategies and emits a comparison grid PNG plus `summary.json` with per-cell chunk lengths, OCR repeat counts, and match scores.
+
 ## Math Route
 
 Math spans use a mixed route:

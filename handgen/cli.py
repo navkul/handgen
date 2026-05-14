@@ -223,8 +223,17 @@ def build_parser() -> argparse.ArgumentParser:
     doc_render.add_argument("writer_id")
     doc_render.add_argument("source")
     doc_render.add_argument("--out", required=True)
-    doc_render.add_argument("--max-words", type=int, default=6, help="Deprecated for carrier rendering; kept for prose-only chunking.")
-    doc_render.add_argument("--max-chars", type=int)
+    doc_render.add_argument(
+        "--max-words",
+        type=int,
+        default=6,
+        help="No-op for the default prose pipeline (balanced_dp). Retained for backward compatibility.",
+    )
+    doc_render.add_argument(
+        "--max-chars",
+        type=int,
+        help="Optional escape hatch: when set, switch the prose pipeline to the legacy char-greedy chunker instead of balanced_dp.",
+    )
     doc_render.set_defaults(func=cmd_document_render)
 
     eval_p = sub.add_parser("eval")

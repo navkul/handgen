@@ -5,12 +5,13 @@ import random
 import re
 import sqlite3
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from .. import db
 from ..diffbrush.runner import DiffBrushRunner
 from ..ingest.worksheet import glyph_bank_from_manifest
 from ..eval.source_contract import verify_source_contract
+from ..chunking import balanced_dp
 from ..parser import chunk_prose, parse_source, plan_to_dict
 from ..utils import data_uri, escape_xml, now_iso, png_size, read_json, render_svg_to_png, require_pillow_numpy, sha_file, sha_text, write_json
 from .ink import rgba_ink_profile
@@ -781,6 +782,8 @@ def render_document(
     *,
     max_words: int = 6,
     max_chars: int | None = None,
+    chunking_strategy: Callable[[str], list[str]] | None = None,
+    chunking_strategy_name: str | None = None,
 ) -> dict[str, Any]:
     db.init_db()
     source_text = source_path.read_text(encoding="utf-8")
@@ -1098,6 +1101,29 @@ def render_document(
             con.execute("UPDATE render_jobs SET status = ?, completed_at = ? WHERE id = ?", ("done", now_iso(), job_id))
         return manifest
 
+    # Prose chunking dispatch:
+    #   1. An explicit `chunking_strategy` callable always wins (used by the
+    #      chunk_compare harness to A/B alternatives).
+    #   2. `--max-chars` keeps the legacy char-greedy chunker available as an
+    #      escape hatch for documents that need it.
+    #   3. Default for every prose render is `balanced_dp` — empirically the
+    #      strongest splitter against IAM-shaped prompts (see docs/findings.md).
+    if chunking_strategy is not None:
+        _resolved_strategy_name = chunking_strategy_name or "custom"
+
+        def _do_chunk(text: str) -> list[str]:
+            return chunking_strategy(text)
+    elif max_chars is not None:
+        _resolved_strategy_name = f"legacy_chars_{max_chars}"
+
+        def _do_chunk(text: str) -> list[str]:
+            return chunk_prose(text, max_words=max_words, max_chars=max_chars)
+    else:
+        _resolved_strategy_name = "balanced_dp"
+
+        def _do_chunk(text: str) -> list[str]:
+            return balanced_dp(text)
+
     prose_chunk_cache: dict[str, dict[str, Any]] = {}
     variable_labels = sorted(
         {
@@ -1142,7 +1168,7 @@ def render_document(
     ]
     span_records: list[dict[str, Any]] = []
     line_records: list[dict[str, Any]] = []
-    prose_route = f"diffbrush_chunked_prose_chars_{max_chars}" if max_chars is not None else "diffbrush_chunked_prose_words"
+    prose_route = f"diffbrush_chunked_prose_strategy_{_resolved_strategy_name}"
     y = TOP
     max_x = PAGE_W - RIGHT
     overflow = False
@@ -1152,7 +1178,7 @@ def render_document(
         line_span_ids: list[str] = []
         for span in line.spans:
             if span.kind == "prose":
-                chunks = chunk_prose(span.text, max_words=max_words, max_chars=max_chars)
+                chunks = _do_chunk(span.text)
                 if not chunks and span.text:
                     continue
                 for chunk_idx, chunk in enumerate(chunks):
@@ -1166,13 +1192,18 @@ def render_document(
                         x = LEFT
                         y += LINE_GAP
                     svg.append(image_tag(crop, x, y, width, height))
+                    # The chunk passed to DiffBrush is the clean prompt; the
+                    # span text recorded in the manifest carries the
+                    # inter-chunk whitespace so source_contract reconstruction
+                    # of the line works for any chunking strategy.
+                    span_text = chunk if chunk_idx == len(chunks) - 1 else chunk + " "
                     record = {
                         "id": chunk_id,
                         "source_span_id": span.id,
                         "line_index": line.index,
                         "type": "prose",
                         "route": run.get("route", "diffbrush_ocr_verified_prose_token"),
-                        "text": chunk,
+                        "text": span_text,
                         "bbox": {"x": round(x, 2), "y": round(y, 2), "width": round(width, 2), "height": round(height, 2)},
                         "diffbrush": run,
                         "exactness_evidence": {
@@ -1245,9 +1276,8 @@ def render_document(
         "source_sha256": sha_text(plan.source_text),
         "routes_used": sorted({record["route"] for record in span_records}),
         "prose_chunking": {
-            "mode": "chars" if max_chars is not None else "words",
-            "max_words": max_words if max_chars is None else None,
-            "max_chars": max_chars,
+            "strategy": _resolved_strategy_name,
+            "max_chars_override": max_chars,
         },
         "style_reference": str(style_ref),
         "worksheet_manifest": str(worksheet["manifest_path"]) if math_needed and worksheet is not None else None,

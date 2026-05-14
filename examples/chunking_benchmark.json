@@ -1,32 +1,27 @@
 [
   {
-    "id": "prose_definition",
+    "id": "prose_robot_window",
     "kind": "prose",
-    "text": "The definition becomes clearer when each assumption is written out in a complete sentence before the proof begins."
+    "text": "The small robot waited by the window while the rain tapped softly against the glass."
   },
   {
-    "id": "prose_summary",
+    "id": "prose_lecture_maya",
     "kind": "prose",
-    "text": "After reviewing the experiment, the final summary explains why the later measurements drifted away from the original baseline."
+    "text": "After the lecture ended, Maya packed her notebook, checked the time, and hurried across campus to meet her lab partner."
   },
   {
-    "id": "prose_explanation",
+    "id": "prose_bookstore",
     "kind": "prose",
-    "text": "A longer worksheet answer should stay readable from left to right instead of repeating an earlier phrase after the first few words."
+    "text": "The old bookstore on the corner smelled like dust, coffee, and paper, but its narrow shelves always seemed to hide exactly the book someone needed."
   },
   {
-    "id": "mixed_bounds",
-    "kind": "mixed",
-    "text": "Choose numbers with [[0 < a < b]] and then note that adding [[c > 0]] preserves the order of the inequality."
+    "id": "prose_handwriting_model",
+    "kind": "prose",
+    "text": "When the team tested the new handwriting model, they noticed that short prompts looked clean at first, yet longer sentences revealed repeated words and uneven spacing."
   },
   {
-    "id": "mixed_sequence",
-    "kind": "mixed",
-    "text": "If [[n > 1]] and [[x = n + 2]], then the next line states that [[x > 3]] before the argument continues in prose."
-  },
-  {
-    "id": "mixed_average",
-    "kind": "mixed",
-    "text": "The proof sets [[m = 4]] and [[m + k = 9]], then explains in words how the remaining quantity is determined."
+    "id": "prose_demo_checklist",
+    "kind": "prose",
+    "text": "For tomorrow's demo, we need a worksheet, a few typed answers, several handwriting samples, and a simple way to compare the rendered output against the original style."
   }
 ]
