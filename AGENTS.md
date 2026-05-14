@@ -26,8 +26,8 @@ Its goal is to prove the core rendering pipeline before building the deployed ap
 2. Later ingest a user-written digit/symbol worksheet.
 3. Accept a text file containing English and optional math spans.
 4. Generate English prose with DiffBrush in short chunks.
-5. Generate English variables inside math spans with DiffBrush context prompts.
-6. Generate digits, Greek, and non-language math symbols from the worksheet glyph bank with slight randomized variation and ink normalization.
+5. Generate English prose and slot-carrier lines with DiffBrush in short chunks.
+6. Generate inline ASCII variables, Greek, and non-language math symbols from the worksheet glyph bank with slight randomized variation and ink normalization. Digits currently use isolated DiffBrush connected components.
 7. Compose the final handwritten document as SVG and PNG.
 8. Save machine-readable manifests for debugging and later evaluation.
 
@@ -38,7 +38,8 @@ Math spans are marked with `[[...]]`. Text outside those delimiters is prose. Te
 - Python package and CLI under `handgen/`
 - SQLite metadata database at `data/handgen.sqlite3`
 - Filesystem storage for input assets, generated crops, SVGs, PNGs, logs, and manifests
-- DiffBrush checkpoint and vendor code referenced from `../04_cpu_neural_scout/vendor/DiffBrush`
+- DiffBrush vendor code under `models/diffbrush/third_party_repo/`
+- DiffBrush checkpoint stored locally at `models/diffbrush/third_party_repo/model_zoo/DiffBrush-ckpt.pt` and ignored by Git
 - SVG as canonical output
 - PNG rendered from SVG with `rsvg-convert`
 
@@ -53,7 +54,7 @@ Do not add a frontend, web backend, subscription system, auth, cloud storage, or
 - Keep generated images and manifests inspectable.
 - Store metadata in SQLite; store large files on disk.
 - Preserve exact source text in sidecars even when DiffBrush prose is not visually exact.
-- Do not present raw DiffBrush math as correct; English variables may route through DiffBrush context-component generation, while digits, Greek, and relation/operator symbols should route through worksheet glyph-bank composition.
+- Do not present raw DiffBrush math as correct; ASCII variables, Greek, and relation/operator symbols should route through worksheet glyph-bank composition. Digits are still DiffBrush components for now and must remain documented as a known MVP limit until moved to worksheet rendering.
 
 ## Documentation Rules
 
@@ -79,17 +80,17 @@ Examples:
 ## Useful Commands
 
 ```bash
-python3 -m handgen init
-python3 -m handgen writer create writer_001
-python3 -m handgen style add writer_001 data/style_refs/writer_001/natural_prose_primary.png
-python3 -m handgen document render writer_001 examples/prose_only.txt --out outputs/prose_only
+python -m handgen init
+python -m handgen writer create writer_001
+python -m handgen style add writer_001 data/style_refs/writer_001/natural_prose_primary.png
+python -m handgen document render writer_001 examples/prose_only.txt --out outputs/prose_only
 ```
 
 After a new worksheet exists:
 
 ```bash
-python3 -m handgen worksheet ingest writer_001 data/worksheets/writer_001/symbol_worksheet_01.png
-python3 -m handgen document render writer_001 examples/mixed_proof.txt --out outputs/mixed_proof
+python -m handgen worksheet ingest writer_001 data/worksheets/writer_001/writer_001_worksheet_01.png
+python -m handgen document render writer_001 examples/mixed_proof.txt --out outputs/mixed_proof
 ```
 
 ## Near-Term Priorities
