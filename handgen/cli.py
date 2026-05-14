@@ -99,7 +99,7 @@ def cmd_document_render(args: argparse.Namespace) -> int:
     if not source.exists():
         raise RuntimeError(f"source text not found: {source}")
     out_dir = Path(args.out).resolve()
-    manifest = render_document(args.writer_id, source, out_dir, max_words=args.max_words)
+    manifest = render_document(args.writer_id, source, out_dir, max_words=args.max_words, max_chars=args.max_chars)
     print(write_summary(manifest))
     return 0
 
@@ -149,6 +149,7 @@ def build_parser() -> argparse.ArgumentParser:
     doc_render.add_argument("source")
     doc_render.add_argument("--out", required=True)
     doc_render.add_argument("--max-words", type=int, default=6)
+    doc_render.add_argument("--max-chars", type=int)
     doc_render.set_defaults(func=cmd_document_render)
     return parser
 

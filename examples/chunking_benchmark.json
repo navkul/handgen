@@ -1,0 +1,32 @@
+[
+  {
+    "id": "prose_definition",
+    "kind": "prose",
+    "text": "The definition becomes clearer when each assumption is written out in a complete sentence before the proof begins."
+  },
+  {
+    "id": "prose_summary",
+    "kind": "prose",
+    "text": "After reviewing the experiment, the final summary explains why the later measurements drifted away from the original baseline."
+  },
+  {
+    "id": "prose_explanation",
+    "kind": "prose",
+    "text": "A longer worksheet answer should stay readable from left to right instead of repeating an earlier phrase after the first few words."
+  },
+  {
+    "id": "mixed_bounds",
+    "kind": "mixed",
+    "text": "Choose numbers with [[0 < a < b]] and then note that adding [[c > 0]] preserves the order of the inequality."
+  },
+  {
+    "id": "mixed_sequence",
+    "kind": "mixed",
+    "text": "If [[n > 1]] and [[x = n + 2]], then the next line states that [[x > 3]] before the argument continues in prose."
+  },
+  {
+    "id": "mixed_average",
+    "kind": "mixed",
+    "text": "The proof sets [[m = 4]] and [[m + k = 9]], then explains in words how the remaining quantity is determined."
+  }
+]

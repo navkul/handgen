@@ -1,10 +1,10 @@
 {
   "schema_version": "handgen_worksheet_manifest_v1",
   "writer_id": "writer_001",
-  "generated_at": "2026-05-12T23:16:20-07:00",
-  "source_path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01.png",
-  "local_source": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01.png",
-  "page_png": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01.png",
+  "generated_at": "2026-05-13T17:12:24-07:00",
+  "source_path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01.png",
+  "local_source": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01.png",
+  "page_png": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01.png",
   "dpi": 220,
   "page_size": [
     1819,
@@ -19,7 +19,7 @@
       "id": "digits",
       "kind": "glyphs",
       "crop": {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/rows/00_digits.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/rows/00_digits.png",
         "bbox": [
           112,
           86,
@@ -28,7 +28,7 @@
         ],
         "width": 1401,
         "height": 87,
-        "sha256": "0046b6ad2517442b078d98552b0cd49969f8213e5928deed5e7a2ef33e76dd58"
+        "sha256": "a762d96f4ced1086a1a53a16fc1ce8c1bca87c861b77d463d5ab83023b862754"
       },
       "physical_row_count": 1,
       "source_row_indices": [
@@ -42,7 +42,7 @@
       "id": "punctuation_operators",
       "kind": "glyphs",
       "crop": {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/rows/01_punctuation_operators.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/rows/01_punctuation_operators.png",
         "bbox": [
           122,
           230,
@@ -51,7 +51,7 @@
         ],
         "width": 1412,
         "height": 238,
-        "sha256": "6d214c320961328808d1ea5037dfff023a0ff6da77faa0ff7def969a61d68ce7"
+        "sha256": "f1e4bf97a15d66eac0f867d96de5b3aefd2cc869b941e65ac3ae013ed0297b6e"
       },
       "physical_row_count": 2,
       "source_row_indices": [
@@ -66,7 +66,7 @@
       "id": "greek_symbols",
       "kind": "glyphs",
       "crop": {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/rows/02_greek_symbols.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/rows/02_greek_symbols.png",
         "bbox": [
           128,
           523,
@@ -75,7 +75,7 @@
         ],
         "width": 969,
         "height": 97,
-        "sha256": "d179aac442cfc6db60b87b6037edfdf54881590b91e9bf13901f6220f6f07435"
+        "sha256": "3a417ab9c6faa4dea1d531a846ac8b1fd7931c12ffd329364c6b8a3041e784f1"
       },
       "physical_row_count": 1,
       "source_row_indices": [
@@ -100,7 +100,7 @@
   "glyphs": {
     "0": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/0/digits_00_0.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/0/digits_00_0.png",
         "bbox": [
           118,
           92,
@@ -109,7 +109,7 @@
         ],
         "width": 58,
         "height": 75,
-        "sha256": "e2a3611f7958e46c53c321753b0bcd79a3c00a6f25f5d825b4003caa10c1d3c2",
+        "sha256": "32af40f3a0ece6113110bea7f826bb483c70cf3552639cbfb19d6256a593ee2a",
         "label": "0",
         "row_id": "digits",
         "row_index": 0,
@@ -118,7 +118,7 @@
     ],
     "1": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/1/digits_01_1.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/1/digits_01_1.png",
         "bbox": [
           275,
           92,
@@ -127,7 +127,7 @@
         ],
         "width": 64,
         "height": 75,
-        "sha256": "6d10fefd0cb40c8ac8adeff54883775a6e57b6a78a460fc623df971e36d929aa",
+        "sha256": "d0e42935857232c81c42c9b437722cd940a5c65d2cb55c9498f55bfd5e9b7551",
         "label": "1",
         "row_id": "digits",
         "row_index": 0,
@@ -136,7 +136,7 @@
     ],
     "2": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/2/digits_02_2.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/2/digits_02_2.png",
         "bbox": [
           425,
           92,
@@ -145,7 +145,7 @@
         ],
         "width": 64,
         "height": 75,
-        "sha256": "70c35c5173139a9fede8805ff9f3dd4b130be47aa726ac77925adf50fb4cf803",
+        "sha256": "ed27e900acacb105f505561fd74b42f52995d9fd124fe0e6be02e048fd4d0d78",
         "label": "2",
         "row_id": "digits",
         "row_index": 0,
@@ -154,7 +154,7 @@
     ],
     "3": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/3/digits_03_3.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/3/digits_03_3.png",
         "bbox": [
           571,
           92,
@@ -163,7 +163,7 @@
         ],
         "width": 52,
         "height": 75,
-        "sha256": "071c0e9d17fe41d060df3462c74202e42eb1c59ef523dab03f54790058e493d2",
+        "sha256": "4d8b68f7f9120cdb19c51f1f387255acc924a86440b06beb945d7affab0879f7",
         "label": "3",
         "row_id": "digits",
         "row_index": 0,
@@ -172,7 +172,7 @@
     ],
     "4": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/4/digits_04_4.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/4/digits_04_4.png",
         "bbox": [
           713,
           92,
@@ -181,7 +181,7 @@
         ],
         "width": 54,
         "height": 75,
-        "sha256": "2d408f39bd15a38a86a08e89dc174f9bc3536a305bf42d5fee5bb419d3533aba",
+        "sha256": "64ca2d25bd9919ceffee80443730fd24daff3334e2726178ea458617884fe83e",
         "label": "4",
         "row_id": "digits",
         "row_index": 0,
@@ -190,7 +190,7 @@
     ],
     "5": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/5/digits_05_5.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/5/digits_05_5.png",
         "bbox": [
           869,
           92,
@@ -199,7 +199,7 @@
         ],
         "width": 53,
         "height": 75,
-        "sha256": "26f24d4a5610c60077845579753d595591f1b963e04678405c421283d925ac11",
+        "sha256": "6dbdd182e272afd1d0d94a42b76515c8bc6086a2604280e960b68e2b7511fc0e",
         "label": "5",
         "row_id": "digits",
         "row_index": 0,
@@ -208,7 +208,7 @@
     ],
     "6": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/6/digits_06_6.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/6/digits_06_6.png",
         "bbox": [
           1014,
           92,
@@ -217,7 +217,7 @@
         ],
         "width": 57,
         "height": 75,
-        "sha256": "2cf22b409ae4908b9b0a80d10db7d2ff77886692de69f43824caf1197dcc35df",
+        "sha256": "8d9b3eab3a44631c91e3d017f96d1e22991ad0a7cfd3cd2272bb56a3ca8b8832",
         "label": "6",
         "row_id": "digits",
         "row_index": 0,
@@ -226,7 +226,7 @@
     ],
     "7": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/7/digits_07_7.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/7/digits_07_7.png",
         "bbox": [
           1161,
           92,
@@ -235,7 +235,7 @@
         ],
         "width": 51,
         "height": 75,
-        "sha256": "dc4be86806a03a3afb03c6d9dfe8b19994d2e07909f84bec529aa612e5404623",
+        "sha256": "a0e72428ef616d0327f78bc1df5f625a40ff82bbea75ab84f1d9678601c88bf9",
         "label": "7",
         "row_id": "digits",
         "row_index": 0,
@@ -244,7 +244,7 @@
     ],
     "8": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/8/digits_08_8.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/8/digits_08_8.png",
         "bbox": [
           1299,
           92,
@@ -253,7 +253,7 @@
         ],
         "width": 56,
         "height": 75,
-        "sha256": "ac6aac9f667cf9450f40c6aac0bf85c3cf9f31af7fbe5ee7742972ac444ed913",
+        "sha256": "00a3c05273ecf99df978d10958f41b82f065c53f57558a647346b353e6847df4",
         "label": "8",
         "row_id": "digits",
         "row_index": 0,
@@ -262,7 +262,7 @@
     ],
     "9": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/9/digits_09_9.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/9/digits_09_9.png",
         "bbox": [
           1450,
           92,
@@ -271,7 +271,7 @@
         ],
         "width": 57,
         "height": 75,
-        "sha256": "cdac04205c71fe8493777b78d3ece5df0c989c0f63eb53bceb3fdf6be55d8aa4",
+        "sha256": "a6d91ead04de124c92fc263626be8b342a1862ee5619869d0544b69f24607758",
         "label": "9",
         "row_id": "digits",
         "row_index": 0,
@@ -280,7 +280,7 @@
     ],
     ".": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/period/punctuation_operators_00_period.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/period/punctuation_operators_00_period.png",
         "bbox": [
           128,
           236,
@@ -289,7 +289,7 @@
         ],
         "width": 45,
         "height": 91,
-        "sha256": "acbb70b251d69028bcf0bf6c25fa9f2a113ba2745b7993a29db4824620117c09",
+        "sha256": "b9397148783cb2d254d8b324968e42440565698419123c7d9eee9eb42dd296d8",
         "label": ".",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -298,7 +298,7 @@
     ],
     ",": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/comma/punctuation_operators_01_comma.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/comma/punctuation_operators_01_comma.png",
         "bbox": [
           202,
           236,
@@ -307,7 +307,7 @@
         ],
         "width": 44,
         "height": 91,
-        "sha256": "66a2c9da1d6d8c102a29591ee24c5b39c9b308d79a74b22f447318006dc4f43e",
+        "sha256": "79f90b0ab932cb5389cc46fe26fa2e0634f3db34a638442208dee5fb54f661e0",
         "label": ",",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -316,7 +316,7 @@
     ],
     ";": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/semicolon/punctuation_operators_02_semicolon.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/semicolon/punctuation_operators_02_semicolon.png",
         "bbox": [
           288,
           236,
@@ -325,7 +325,7 @@
         ],
         "width": 47,
         "height": 91,
-        "sha256": "00a24528ad818fd832d79ed03f609c9ec6ad880118065dddee3a99bd388b1baa",
+        "sha256": "e50c88368a7a00982962344ef83a9e34e1e67ed0e2afae4ac333e58505265719",
         "label": ";",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -334,7 +334,7 @@
     ],
     ":": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/colon/punctuation_operators_03_colon.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/colon/punctuation_operators_03_colon.png",
         "bbox": [
           360,
           236,
@@ -343,7 +343,7 @@
         ],
         "width": 44,
         "height": 91,
-        "sha256": "3b4b0ef8c811981ba7ee74d0fd201fcd517dc6e2372ad1eef92d13e30a2066c0",
+        "sha256": "7daa91e6500f0f715cf659e9698ba0fb75d5b23b51422453bbc680ec62f6c3e5",
         "label": ":",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -352,7 +352,7 @@
     ],
     "!": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/bang/punctuation_operators_04_bang.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/bang/punctuation_operators_04_bang.png",
         "bbox": [
           427,
           236,
@@ -361,7 +361,7 @@
         ],
         "width": 42,
         "height": 91,
-        "sha256": "cd421afea0d6e1d76a06ac7e440e25e82760c949a9a7ee315ebecf05be564a19",
+        "sha256": "5899ed69a07f45ef6648edfedf01bb4ab3e2eb12e5779d96c958d0120bc3dc64",
         "label": "!",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -370,7 +370,7 @@
     ],
     "?": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/question/punctuation_operators_05_question.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/question/punctuation_operators_05_question.png",
         "bbox": [
           503,
           236,
@@ -379,7 +379,7 @@
         ],
         "width": 50,
         "height": 91,
-        "sha256": "1878fb940c5f926b2e5c3c0de3861786c96c59214b2109c5735dfdb835aba052",
+        "sha256": "16e217e127b4676909df62ae726ae567f04f08a956d50f02070a92382e0f5fc6",
         "label": "?",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -388,7 +388,7 @@
     ],
     "'": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/apostrophe/punctuation_operators_06_apostrophe.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/apostrophe/punctuation_operators_06_apostrophe.png",
         "bbox": [
           575,
           236,
@@ -397,7 +397,7 @@
         ],
         "width": 40,
         "height": 91,
-        "sha256": "4a23113f3c1db454d28361d302547522eb271973526e8753627bc6a663558688",
+        "sha256": "0279d871adeeb547bbd74f349a61860d4ae76496dc0572db62f1d241e6dd7b59",
         "label": "'",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -406,7 +406,7 @@
     ],
     "\"": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/quote/punctuation_operators_07_quote.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/quote/punctuation_operators_07_quote.png",
         "bbox": [
           643,
           236,
@@ -415,7 +415,7 @@
         ],
         "width": 52,
         "height": 91,
-        "sha256": "bf433418fc87c3d35756525ba84c7e4c6593913c15bd061430dd749487f2ba0b",
+        "sha256": "1661ee35d0024754a1bfc8f9242d22109e1a0d9a96409229794a5878b4c98062",
         "label": "\"",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -424,7 +424,7 @@
     ],
     "-": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/hyphen/punctuation_operators_08_hyphen.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/hyphen/punctuation_operators_08_hyphen.png",
         "bbox": [
           720,
           236,
@@ -433,7 +433,7 @@
         ],
         "width": 57,
         "height": 91,
-        "sha256": "cfe015b6b2f4e8360441ab3abd5c6ce683b3691e3391d3705f2e3df889108325",
+        "sha256": "d6bd02703262c4af0221dd90a1880a7ca0e2e529279e23a06e4c2e859b1ea308",
         "label": "-",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -442,7 +442,7 @@
     ],
     "(": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lparen/punctuation_operators_09_lparen.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lparen/punctuation_operators_09_lparen.png",
         "bbox": [
           810,
           236,
@@ -451,7 +451,7 @@
         ],
         "width": 62,
         "height": 91,
-        "sha256": "10d74882f867236d9abcc2a2fba03b06587c1d5acf50f2eb95afe19b5aa26abe",
+        "sha256": "fde5be76440658a6e2bd987208f862ae568cc0a62caf071b6d838cb53338ac19",
         "label": "(",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -460,7 +460,7 @@
     ],
     ")": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/rparen/punctuation_operators_10_rparen.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/rparen/punctuation_operators_10_rparen.png",
         "bbox": [
           891,
           236,
@@ -469,7 +469,7 @@
         ],
         "width": 56,
         "height": 91,
-        "sha256": "c9c672bced22e223aaf64c60eea1fcf4616507efea80433285fe6c860f265512",
+        "sha256": "2cbd33bec6c0e5f6ed3bd8460ab05155837badf8c9dc6eae5ae5bc296a2740cd",
         "label": ")",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -478,7 +478,7 @@
     ],
     "[": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lbracket/punctuation_operators_11_lbracket.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lbracket/punctuation_operators_11_lbracket.png",
         "bbox": [
           991,
           236,
@@ -487,7 +487,7 @@
         ],
         "width": 60,
         "height": 91,
-        "sha256": "63f747a974a91a824daf331bb49496e2ed6f6398fb1201244fe68f1159aba01f",
+        "sha256": "97e2a3ae3b4ed24b90fe0d4dde16326167e89c6dde6f43fead6d3bf6e6897550",
         "label": "[",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -496,7 +496,7 @@
     ],
     "]": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/rbracket/punctuation_operators_12_rbracket.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/rbracket/punctuation_operators_12_rbracket.png",
         "bbox": [
           1064,
           236,
@@ -505,7 +505,7 @@
         ],
         "width": 53,
         "height": 91,
-        "sha256": "6076eabdabd546d10640fafa8c90810d43e1b102338da06c82a992929fe26124",
+        "sha256": "a470cc04101fc7cd25e3f0065a8317d2003fb526a91e4a1a84a8b32145165d0c",
         "label": "]",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -514,7 +514,7 @@
     ],
     "{": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lbrace/punctuation_operators_13_lbrace.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lbrace/punctuation_operators_13_lbrace.png",
         "bbox": [
           1149,
           236,
@@ -523,7 +523,7 @@
         ],
         "width": 55,
         "height": 91,
-        "sha256": "0117730c4d985cc437d61eb23e5b63ff01063aeccc93abff21c3a60befa75244",
+        "sha256": "1382cc64004768c3624155506e265c408451c1669440ada32b3e79cad05de2f8",
         "label": "{",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -532,7 +532,7 @@
     ],
     "}": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/rbrace/punctuation_operators_14_rbrace.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/rbrace/punctuation_operators_14_rbrace.png",
         "bbox": [
           1222,
           236,
@@ -541,7 +541,7 @@
         ],
         "width": 55,
         "height": 91,
-        "sha256": "070e061de76534186c545b7e3425e574e54245170cd33da01be3279e620447f9",
+        "sha256": "2eb6a989f85cc5d40894183a29bca724ebd343a3b23e4e0f469730dc4bb7de04",
         "label": "}",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -550,7 +550,7 @@
     ],
     "<": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lt/punctuation_operators_15_lt.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lt/punctuation_operators_15_lt.png",
         "bbox": [
           1303,
           236,
@@ -559,7 +559,7 @@
         ],
         "width": 58,
         "height": 91,
-        "sha256": "0b19916e9a33fbb40e7fe27ba89bc1e57ec6364b3fc6484b4a664d460738b127",
+        "sha256": "14e6b0b58f63ed1acc1a26f3a260dc902d8771e6300a074af35d45a65b4a8d86",
         "label": "<",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -568,7 +568,7 @@
     ],
     ">": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/gt/punctuation_operators_16_gt.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/gt/punctuation_operators_16_gt.png",
         "bbox": [
           1374,
           236,
@@ -577,7 +577,7 @@
         ],
         "width": 61,
         "height": 91,
-        "sha256": "89db6c0e5ab28f9ccf3fad97f619a8e53847a58a1e91f41f07f482634661544d",
+        "sha256": "79cc598971eec27512a700db61560eac3001ff8275fb3f36d7f378c0e2729520",
         "label": ">",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -586,7 +586,7 @@
     ],
     "+": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/plus/punctuation_operators_17_plus.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/plus/punctuation_operators_17_plus.png",
         "bbox": [
           1468,
           236,
@@ -595,7 +595,7 @@
         ],
         "width": 60,
         "height": 91,
-        "sha256": "ba1459a7b53711881e24c348064e090ffbaec8cf59032b37d7eafc7481368f37",
+        "sha256": "9f4748371b571a885ed2f38a8e069eda69d238c81e41eba8aa53592b5b65212f",
         "label": "+",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -604,7 +604,7 @@
     ],
     "=": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/equals/punctuation_operators_18_equals.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/equals/punctuation_operators_18_equals.png",
         "bbox": [
           135,
           380,
@@ -613,7 +613,7 @@
         ],
         "width": 55,
         "height": 82,
-        "sha256": "439afd5d3982ca553be80152a9b673be52e2230efc4967168153689a6ddd91e0",
+        "sha256": "ced33515d9a3c1d4865a61761fec6827ef2af99773451c21cf2c3d4c278e0908",
         "label": "=",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -622,7 +622,7 @@
     ],
     "*": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/asterisk/punctuation_operators_19_asterisk.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/asterisk/punctuation_operators_19_asterisk.png",
         "bbox": [
           240,
           380,
@@ -631,7 +631,7 @@
         ],
         "width": 56,
         "height": 82,
-        "sha256": "d119092788609bb8270594b0cdab834640f64b6d2dcf724af069e3e4bfde363f",
+        "sha256": "1c5567063a7d3a03981874197b7da755adbea5e07cfbbacd0e767600a183650a",
         "label": "*",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -640,7 +640,7 @@
     ],
     "/": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/slash/punctuation_operators_20_slash.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/slash/punctuation_operators_20_slash.png",
         "bbox": [
           364,
           380,
@@ -649,7 +649,7 @@
         ],
         "width": 61,
         "height": 82,
-        "sha256": "298402b07a3e5623fecf4d7dd74d18abd8338afc9024413fe0267af351e4059b",
+        "sha256": "a7de5a59e17fd6573b525b562184fd5b536b4f8d98eb17799e297b091d325ba9",
         "label": "/",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -658,7 +658,7 @@
     ],
     "_": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/underscore/punctuation_operators_21_underscore.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/underscore/punctuation_operators_21_underscore.png",
         "bbox": [
           455,
           380,
@@ -667,7 +667,7 @@
         ],
         "width": 69,
         "height": 82,
-        "sha256": "f59e648049b1b2246a4e61e908471e5141d03490809e74145f776e177700b6bd",
+        "sha256": "6a5fb69766bfd0d6e8a80f6b388380080c063ec0f7a41dc14f06884291631001",
         "label": "_",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -676,7 +676,7 @@
     ],
     "|": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/bar/punctuation_operators_22_bar.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/bar/punctuation_operators_22_bar.png",
         "bbox": [
           559,
           380,
@@ -685,7 +685,7 @@
         ],
         "width": 43,
         "height": 82,
-        "sha256": "3ce1a730318c86e0ddd3700d605e9e038f429574fca7d0715050928325a09b07",
+        "sha256": "c9fb483320f1b2fee09a357ece1f7d62be3156fdeeeaa6ad830db4e78696a5bd",
         "label": "|",
         "row_id": "punctuation_operators",
         "row_index": 1,
@@ -694,7 +694,7 @@
     ],
     "alpha": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/alpha/greek_symbols_00_alpha.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/alpha/greek_symbols_00_alpha.png",
         "bbox": [
           134,
           529,
@@ -703,7 +703,7 @@
         ],
         "width": 74,
         "height": 85,
-        "sha256": "97df27493cf533bcff4ca95f6e2c4ae4d59094debdb9909a23c68fad92c70d26",
+        "sha256": "10bc1e8a46b4da1254d492c6439b1f2adc6240d9a5644d18a6112e3460b42bd4",
         "label": "alpha",
         "row_id": "greek_symbols",
         "row_index": 2,
@@ -712,7 +712,7 @@
     ],
     "beta": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/beta/greek_symbols_01_beta.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/beta/greek_symbols_01_beta.png",
         "bbox": [
           264,
           529,
@@ -721,7 +721,7 @@
         ],
         "width": 65,
         "height": 85,
-        "sha256": "a46c8c9f1b456c86189599e4d3b4facaa2cdb25c9b58cdde46cd97b8f2800c9a",
+        "sha256": "6b85bc71a5db1e2eb33a9f8965e85e50a47eec2b35c147ae7be6043e48e75b05",
         "label": "beta",
         "row_id": "greek_symbols",
         "row_index": 2,
@@ -730,7 +730,7 @@
     ],
     "theta": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/theta/greek_symbols_02_theta.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/theta/greek_symbols_02_theta.png",
         "bbox": [
           403,
           529,
@@ -739,7 +739,7 @@
         ],
         "width": 61,
         "height": 85,
-        "sha256": "08aa228a81ee0a46d599cf4cd16ff699693dac28bbaa2f56ea3ceab77cfca4b3",
+        "sha256": "025e89faf6d806f222ddc2c08dc5f60bfdbbe6e5cc3c0aa30920ba9ff7576250",
         "label": "theta",
         "row_id": "greek_symbols",
         "row_index": 2,
@@ -748,7 +748,7 @@
     ],
     "lambda": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lambda/greek_symbols_03_lambda.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/lambda/greek_symbols_03_lambda.png",
         "bbox": [
           561,
           529,
@@ -757,7 +757,7 @@
         ],
         "width": 65,
         "height": 85,
-        "sha256": "eaa364ff3c2ab624283a9405995d200c326fca60f47d234e636e500d448bbcad",
+        "sha256": "452447ca9a912a4f5857feab6b5bad9a5348dc1dc3ba9bd786ca0b223cd60484",
         "label": "lambda",
         "row_id": "greek_symbols",
         "row_index": 2,
@@ -766,7 +766,7 @@
     ],
     "mu": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/mu/greek_symbols_04_mu.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/mu/greek_symbols_04_mu.png",
         "bbox": [
           716,
           529,
@@ -775,7 +775,7 @@
         ],
         "width": 67,
         "height": 85,
-        "sha256": "262855a8e3f6c13dd4291e57ce0c17250b265c896983fb5d6d12e17c6df0225c",
+        "sha256": "65eb4e74ee4f419b710c7ec80146839d05fa06f6ab9e356db69494bd582ca3cc",
         "label": "mu",
         "row_id": "greek_symbols",
         "row_index": 2,
@@ -784,7 +784,7 @@
     ],
     "pi": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/pi/greek_symbols_05_pi.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/pi/greek_symbols_05_pi.png",
         "bbox": [
           856,
           529,
@@ -793,7 +793,7 @@
         ],
         "width": 82,
         "height": 85,
-        "sha256": "ece369751b322d600a1f00b498569f33df411694dc6aa84c1ae066ce97cea4f8",
+        "sha256": "85c9b12d116032618b0fb333e23cffd1f5e06f00c72efcd559583d037639997e",
         "label": "pi",
         "row_id": "greek_symbols",
         "row_index": 2,
@@ -802,7 +802,7 @@
     ],
     "sigma": [
       {
-        "path": "/Users/arnavkulkarni/Developer/handwriting-research/repo/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/sigma/greek_symbols_06_sigma.png",
+        "path": "/Users/felixtuchscherer/Desktop/dev/handgen/data/worksheets/writer_001/symbol_worksheet_01/glyph_bank/sigma/greek_symbols_06_sigma.png",
         "bbox": [
           1003,
           529,
@@ -811,7 +811,7 @@
         ],
         "width": 88,
         "height": 85,
-        "sha256": "57e724ff0e92f9ccc5d8511ef33eda0ff7a9d8e38624315a200febcc9c36fb68",
+        "sha256": "d00906f2a70de7100f77f13f098269261f22982fea84ff77cce349f24de28ae3",
         "label": "sigma",
         "row_id": "greek_symbols",
         "row_index": 2,

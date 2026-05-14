@@ -56,7 +56,14 @@ def _insert_render_span(
     )
 
 
-def render_document(writer_id: str, source_path: Path, out_dir: Path, *, max_words: int = 6) -> dict[str, Any]:
+def render_document(
+    writer_id: str,
+    source_path: Path,
+    out_dir: Path,
+    *,
+    max_words: int = 6,
+    max_chars: int | None = None,
+) -> dict[str, Any]:
     db.init_db()
     source_text = source_path.read_text(encoding="utf-8")
     plan = parse_source(source_text)
@@ -129,6 +136,7 @@ def render_document(writer_id: str, source_path: Path, out_dir: Path, *, max_wor
     ]
     span_records: list[dict[str, Any]] = []
     line_records: list[dict[str, Any]] = []
+    prose_route = f"diffbrush_chunked_prose_chars_{max_chars}" if max_chars is not None else "diffbrush_chunked_prose_words"
     y = TOP
     max_x = PAGE_W - RIGHT
     overflow = False
@@ -138,7 +146,7 @@ def render_document(writer_id: str, source_path: Path, out_dir: Path, *, max_wor
         line_span_ids: list[str] = []
         for span in line.spans:
             if span.kind == "prose":
-                chunks = chunk_prose(span.text, max_words=max_words)
+                chunks = chunk_prose(span.text, max_words=max_words, max_chars=max_chars)
                 if not chunks and span.text:
                     x += 10
                     continue
@@ -163,7 +171,7 @@ def render_document(writer_id: str, source_path: Path, out_dir: Path, *, max_wor
                         "source_span_id": span.id,
                         "line_index": line.index,
                         "type": "prose",
-                        "route": "diffbrush_chunked_prose",
+                        "route": prose_route,
                         "text": chunk,
                         "bbox": {"x": round(x, 2), "y": round(y, 2), "width": round(width, 2), "height": round(height, 2)},
                         "diffbrush": run,
@@ -234,6 +242,11 @@ def render_document(writer_id: str, source_path: Path, out_dir: Path, *, max_wor
         "source_text": plan.source_text,
         "source_sha256": sha_text(plan.source_text),
         "routes_used": sorted({record["route"] for record in span_records}),
+        "prose_chunking": {
+            "mode": "chars" if max_chars is not None else "words",
+            "max_words": max_words if max_chars is None else None,
+            "max_chars": max_chars,
+        },
         "style_reference": str(style_ref),
         "worksheet_manifest": str(worksheet["manifest_path"]) if math_needed and worksheet is not None else None,
         "math_style_profile": style_profile,

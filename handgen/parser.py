@@ -76,7 +76,37 @@ def parse_source(source_text: str) -> ParsePlan:
     return ParsePlan(source_text="\n".join(line.text for line in lines), lines=tuple(lines), spans=tuple(spans))
 
 
-def chunk_prose(text: str, max_words: int = 6) -> list[str]:
+def _split_long_token(token: str, max_chars: int) -> list[str]:
+    return [token[i : i + max_chars] for i in range(0, len(token), max_chars)]
+
+
+def chunk_prose(text: str, max_words: int = 6, max_chars: int | None = None) -> list[str]:
+    if max_chars is not None:
+        if max_chars <= 0:
+            raise ValueError("max_chars must be positive")
+        words = text.split()
+        if not words:
+            return []
+        chunks: list[str] = []
+        current: list[str] = []
+        current_len = 0
+        for word in words:
+            for piece in _split_long_token(word, max_chars):
+                if not current:
+                    current = [piece]
+                    current_len = len(piece)
+                    continue
+                proposed_len = current_len + 1 + len(piece)
+                if proposed_len > max_chars:
+                    chunks.append(" ".join(current))
+                    current = [piece]
+                    current_len = len(piece)
+                    continue
+                current.append(piece)
+                current_len = proposed_len
+        if current:
+            chunks.append(" ".join(current))
+        return chunks
     words = text.split()
     if not words:
         return []

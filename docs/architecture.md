@@ -14,7 +14,7 @@ The product direction is a subscription site where users can turn ordinary sourc
 - `handgen/db.py` owns the SQLite schema and metadata helpers.
 - `handgen/parser.py` parses source text and `[[...]]` math spans into a render plan that preserves source text.
 - `handgen/ingest/worksheet.py` rasterizes worksheet inputs and extracts labeled glyph-bank crops.
-- `handgen/diffbrush/runner.py` wraps the external DiffBrush runner, candidate generation, OCR reranking, and isolated component extraction.
+- `handgen/diffbrush/runner.py` loads the DiffBrush model in-process and reuses it across every prose chunk and variable in a render, plus candidate generation, OCR reranking, and isolated component extraction.
 - `handgen/render/document.py` orchestrates document rendering, source-preservation checks, SVG composition, PNG export, and output manifests.
 - `handgen/render/math.py` composes math spans from worksheet glyphs and selected DiffBrush components.
 - `handgen/render/ink.py` normalizes ink alpha, crop trimming, and handwritten asset appearance.
@@ -55,8 +55,10 @@ Runtime overrides are supported with:
 
 - `DIFFBRUSH_ROOT`
 - `DIFFBRUSH_CHECKPOINT`
-- `DIFFBRUSH_RUNNER`
-- `DIFFBRUSH_PYTHON`
+- `DIFFBRUSH_DEVICE` (default `auto`; falls back from `mps` to `cpu` on failure)
+- `DIFFBRUSH_STEPS` (default `20` DDIM sampling steps)
+
+DiffBrush is invoked in-process. The model is built once on the first generate call in a render and held in memory for the rest of that render, so each subsequent chunk avoids the model-load cost. This replaces the earlier subprocess-per-chunk approach and is roughly 3.75× faster end-to-end on a 3-chunk test.
 
 Image processing depends on Pillow and NumPy. PNG export depends on `rsvg-convert` being available at runtime.
 
