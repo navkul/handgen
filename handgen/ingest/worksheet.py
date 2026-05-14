@@ -17,6 +17,8 @@ ROW_SPECS = [
         "labels": [".", ",", ";", ":", "!", "?", "'", '"', "-", "(", ")", "[", "]", "{", "}", "<", ">", "+", "=", "*", "/", "_", "|"],
     },
     {"id": "greek_symbols", "kind": "glyphs", "labels": ["alpha", "beta", "gamma", "theta", "lambda", "mu", "pi", "sigma"]},
+    {"id": "lowercase_letters", "kind": "glyphs", "labels": list("abcdefghijklmnopqrstuvwxyz")},
+    {"id": "uppercase_letters", "kind": "glyphs", "labels": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")},
 ]
 
 
@@ -178,6 +180,8 @@ def _consume_spec_rows(mask: Any, rows: list[dict[str, Any]], start_idx: int, sp
         consumed.append({"source_row_index": row_idx, "row": row, "row_box": row_box, "groups": groups})
         detected += len(groups)
         row_idx += 1
+        if spec["id"] == "greek_symbols" and detected == len(labels) - 1:
+            break
         if detected >= len(labels):
             break
     return consumed, row_idx

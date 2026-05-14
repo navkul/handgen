@@ -62,11 +62,11 @@ Update rule: Revisit this entry when parser output, manifest schema, source-cont
 
 ## 2026-05-14: Split Prose Generation From Math Symbol Rendering
 
-Decision: Prose routes through source-locked DiffBrush generation. Math symbols route through worksheet glyph-bank composition where possible, with English variables allowed to use DiffBrush context/component generation.
+Decision: Prose routes through source-locked DiffBrush generation. Inline ASCII variables, Greek, operators, relation symbols, and punctuation route through worksheet glyph-bank composition where possible. Digits still use isolated DiffBrush components for the current MVP iteration.
 
 Reason: DiffBrush is useful for natural handwriting, but raw generated math is not trusted as exact source-preserving notation.
 
-Tradeoff: Mixed rendering requires ink normalization, sizing rules, and route-specific verification.
+Tradeoff: Mixed rendering requires ink normalization, sizing rules, and route-specific verification. Digit rendering is still less exact than worksheet glyph rendering and remains a known limit.
 
 Update rule: Revisit this entry when digit, Greek, operator, punctuation, or variable routing changes.
 

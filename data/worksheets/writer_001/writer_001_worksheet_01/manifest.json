@@ -1,0 +1,1915 @@
+{
+  "coverage": {
+    "available_labels": [
+      "!",
+      "\"",
+      "'",
+      "(",
+      ")",
+      "*",
+      "+",
+      ",",
+      "-",
+      ".",
+      "/",
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      ":",
+      ";",
+      "<",
+      "=",
+      ">",
+      "?",
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "K",
+      "L",
+      "M",
+      "N",
+      "O",
+      "P",
+      "Q",
+      "R",
+      "S",
+      "T",
+      "U",
+      "V",
+      "W",
+      "X",
+      "Y",
+      "Z",
+      "[",
+      "]",
+      "_",
+      "a",
+      "alpha",
+      "b",
+      "beta",
+      "c",
+      "d",
+      "e",
+      "f",
+      "g",
+      "h",
+      "i",
+      "j",
+      "k",
+      "l",
+      "lambda",
+      "m",
+      "mu",
+      "n",
+      "o",
+      "p",
+      "pi",
+      "q",
+      "r",
+      "s",
+      "sigma",
+      "t",
+      "theta",
+      "u",
+      "v",
+      "w",
+      "x",
+      "y",
+      "z",
+      "{",
+      "|",
+      "}"
+    ]
+  },
+  "detected_component_count": 102,
+  "detected_row_count": 10,
+  "dpi": 220,
+  "generated_at": "2026-05-13T11:13:33-07:00",
+  "glyphs": {
+    "!": [
+      {
+        "bbox": [
+          427,
+          236,
+          469,
+          327
+        ],
+        "height": 91,
+        "label": "!",
+        "label_index": 4,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/bang/punctuation_operators_04_bang.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "cd421afea0d6e1d76a06ac7e440e25e82760c949a9a7ee315ebecf05be564a19",
+        "width": 42
+      }
+    ],
+    "\"": [
+      {
+        "bbox": [
+          643,
+          236,
+          695,
+          327
+        ],
+        "height": 91,
+        "label": "\"",
+        "label_index": 7,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/quote/punctuation_operators_07_quote.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "bf433418fc87c3d35756525ba84c7e4c6593913c15bd061430dd749487f2ba0b",
+        "width": 52
+      }
+    ],
+    "'": [
+      {
+        "bbox": [
+          575,
+          236,
+          615,
+          327
+        ],
+        "height": 91,
+        "label": "'",
+        "label_index": 6,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/apostrophe/punctuation_operators_06_apostrophe.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "4a23113f3c1db454d28361d302547522eb271973526e8753627bc6a663558688",
+        "width": 40
+      }
+    ],
+    "(": [
+      {
+        "bbox": [
+          810,
+          236,
+          872,
+          327
+        ],
+        "height": 91,
+        "label": "(",
+        "label_index": 9,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/lparen/punctuation_operators_09_lparen.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "10d74882f867236d9abcc2a2fba03b06587c1d5acf50f2eb95afe19b5aa26abe",
+        "width": 62
+      }
+    ],
+    ")": [
+      {
+        "bbox": [
+          891,
+          236,
+          947,
+          327
+        ],
+        "height": 91,
+        "label": ")",
+        "label_index": 10,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/rparen/punctuation_operators_10_rparen.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "c9c672bced22e223aaf64c60eea1fcf4616507efea80433285fe6c860f265512",
+        "width": 56
+      }
+    ],
+    "*": [
+      {
+        "bbox": [
+          240,
+          380,
+          296,
+          462
+        ],
+        "height": 82,
+        "label": "*",
+        "label_index": 19,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/asterisk/punctuation_operators_19_asterisk.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "d119092788609bb8270594b0cdab834640f64b6d2dcf724af069e3e4bfde363f",
+        "width": 56
+      }
+    ],
+    "+": [
+      {
+        "bbox": [
+          1468,
+          236,
+          1528,
+          327
+        ],
+        "height": 91,
+        "label": "+",
+        "label_index": 17,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/plus/punctuation_operators_17_plus.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "ba1459a7b53711881e24c348064e090ffbaec8cf59032b37d7eafc7481368f37",
+        "width": 60
+      }
+    ],
+    ",": [
+      {
+        "bbox": [
+          202,
+          236,
+          246,
+          327
+        ],
+        "height": 91,
+        "label": ",",
+        "label_index": 1,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/comma/punctuation_operators_01_comma.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "66a2c9da1d6d8c102a29591ee24c5b39c9b308d79a74b22f447318006dc4f43e",
+        "width": 44
+      }
+    ],
+    "-": [
+      {
+        "bbox": [
+          720,
+          236,
+          777,
+          327
+        ],
+        "height": 91,
+        "label": "-",
+        "label_index": 8,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/hyphen/punctuation_operators_08_hyphen.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "cfe015b6b2f4e8360441ab3abd5c6ce683b3691e3391d3705f2e3df889108325",
+        "width": 57
+      }
+    ],
+    ".": [
+      {
+        "bbox": [
+          128,
+          236,
+          173,
+          327
+        ],
+        "height": 91,
+        "label": ".",
+        "label_index": 0,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/period/punctuation_operators_00_period.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "acbb70b251d69028bcf0bf6c25fa9f2a113ba2745b7993a29db4824620117c09",
+        "width": 45
+      }
+    ],
+    "/": [
+      {
+        "bbox": [
+          364,
+          380,
+          425,
+          462
+        ],
+        "height": 82,
+        "label": "/",
+        "label_index": 20,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/slash/punctuation_operators_20_slash.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "298402b07a3e5623fecf4d7dd74d18abd8338afc9024413fe0267af351e4059b",
+        "width": 61
+      }
+    ],
+    "0": [
+      {
+        "bbox": [
+          118,
+          92,
+          176,
+          167
+        ],
+        "height": 75,
+        "label": "0",
+        "label_index": 0,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/0/digits_00_0.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "e2a3611f7958e46c53c321753b0bcd79a3c00a6f25f5d825b4003caa10c1d3c2",
+        "width": 58
+      }
+    ],
+    "1": [
+      {
+        "bbox": [
+          275,
+          92,
+          339,
+          167
+        ],
+        "height": 75,
+        "label": "1",
+        "label_index": 1,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/1/digits_01_1.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "6d10fefd0cb40c8ac8adeff54883775a6e57b6a78a460fc623df971e36d929aa",
+        "width": 64
+      }
+    ],
+    "2": [
+      {
+        "bbox": [
+          425,
+          92,
+          489,
+          167
+        ],
+        "height": 75,
+        "label": "2",
+        "label_index": 2,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/2/digits_02_2.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "70c35c5173139a9fede8805ff9f3dd4b130be47aa726ac77925adf50fb4cf803",
+        "width": 64
+      }
+    ],
+    "3": [
+      {
+        "bbox": [
+          571,
+          92,
+          623,
+          167
+        ],
+        "height": 75,
+        "label": "3",
+        "label_index": 3,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/3/digits_03_3.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "071c0e9d17fe41d060df3462c74202e42eb1c59ef523dab03f54790058e493d2",
+        "width": 52
+      }
+    ],
+    "4": [
+      {
+        "bbox": [
+          713,
+          92,
+          767,
+          167
+        ],
+        "height": 75,
+        "label": "4",
+        "label_index": 4,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/4/digits_04_4.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "2d408f39bd15a38a86a08e89dc174f9bc3536a305bf42d5fee5bb419d3533aba",
+        "width": 54
+      }
+    ],
+    "5": [
+      {
+        "bbox": [
+          869,
+          92,
+          922,
+          167
+        ],
+        "height": 75,
+        "label": "5",
+        "label_index": 5,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/5/digits_05_5.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "26f24d4a5610c60077845579753d595591f1b963e04678405c421283d925ac11",
+        "width": 53
+      }
+    ],
+    "6": [
+      {
+        "bbox": [
+          1014,
+          92,
+          1071,
+          167
+        ],
+        "height": 75,
+        "label": "6",
+        "label_index": 6,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/6/digits_06_6.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "2cf22b409ae4908b9b0a80d10db7d2ff77886692de69f43824caf1197dcc35df",
+        "width": 57
+      }
+    ],
+    "7": [
+      {
+        "bbox": [
+          1161,
+          92,
+          1212,
+          167
+        ],
+        "height": 75,
+        "label": "7",
+        "label_index": 7,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/7/digits_07_7.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "dc4be86806a03a3afb03c6d9dfe8b19994d2e07909f84bec529aa612e5404623",
+        "width": 51
+      }
+    ],
+    "8": [
+      {
+        "bbox": [
+          1299,
+          92,
+          1355,
+          167
+        ],
+        "height": 75,
+        "label": "8",
+        "label_index": 8,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/8/digits_08_8.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "ac6aac9f667cf9450f40c6aac0bf85c3cf9f31af7fbe5ee7742972ac444ed913",
+        "width": 56
+      }
+    ],
+    "9": [
+      {
+        "bbox": [
+          1450,
+          92,
+          1507,
+          167
+        ],
+        "height": 75,
+        "label": "9",
+        "label_index": 9,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/9/digits_09_9.png",
+        "row_id": "digits",
+        "row_index": 0,
+        "sha256": "cdac04205c71fe8493777b78d3ece5df0c989c0f63eb53bceb3fdf6be55d8aa4",
+        "width": 57
+      }
+    ],
+    ":": [
+      {
+        "bbox": [
+          360,
+          236,
+          404,
+          327
+        ],
+        "height": 91,
+        "label": ":",
+        "label_index": 3,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/colon/punctuation_operators_03_colon.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "3b4b0ef8c811981ba7ee74d0fd201fcd517dc6e2372ad1eef92d13e30a2066c0",
+        "width": 44
+      }
+    ],
+    ";": [
+      {
+        "bbox": [
+          288,
+          236,
+          335,
+          327
+        ],
+        "height": 91,
+        "label": ";",
+        "label_index": 2,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/semicolon/punctuation_operators_02_semicolon.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "00a24528ad818fd832d79ed03f609c9ec6ad880118065dddee3a99bd388b1baa",
+        "width": 47
+      }
+    ],
+    "<": [
+      {
+        "bbox": [
+          1303,
+          236,
+          1361,
+          327
+        ],
+        "height": 91,
+        "label": "<",
+        "label_index": 15,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/lt/punctuation_operators_15_lt.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "0b19916e9a33fbb40e7fe27ba89bc1e57ec6364b3fc6484b4a664d460738b127",
+        "width": 58
+      }
+    ],
+    "=": [
+      {
+        "bbox": [
+          135,
+          380,
+          190,
+          462
+        ],
+        "height": 82,
+        "label": "=",
+        "label_index": 18,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/equals/punctuation_operators_18_equals.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "439afd5d3982ca553be80152a9b673be52e2230efc4967168153689a6ddd91e0",
+        "width": 55
+      }
+    ],
+    ">": [
+      {
+        "bbox": [
+          1374,
+          236,
+          1435,
+          327
+        ],
+        "height": 91,
+        "label": ">",
+        "label_index": 16,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/gt/punctuation_operators_16_gt.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "89db6c0e5ab28f9ccf3fad97f619a8e53847a58a1e91f41f07f482634661544d",
+        "width": 61
+      }
+    ],
+    "?": [
+      {
+        "bbox": [
+          503,
+          236,
+          553,
+          327
+        ],
+        "height": 91,
+        "label": "?",
+        "label_index": 5,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/question/punctuation_operators_05_question.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "1878fb940c5f926b2e5c3c0de3861786c96c59214b2109c5735dfdb835aba052",
+        "width": 50
+      }
+    ],
+    "A": [
+      {
+        "bbox": [
+          149,
+          1244,
+          209,
+          1329
+        ],
+        "height": 85,
+        "label": "A",
+        "label_index": 0,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/A/uppercase_letters_00_A.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "8e0c9d6a1475eec4dac49e79e150b8717968ec1877fece8165dcb4991949172b",
+        "width": 60
+      }
+    ],
+    "B": [
+      {
+        "bbox": [
+          296,
+          1244,
+          355,
+          1329
+        ],
+        "height": 85,
+        "label": "B",
+        "label_index": 1,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/B/uppercase_letters_01_B.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "4fc570552439b2bbbabf4f0928c81db757dc72e69932213926deb3033d50bc29",
+        "width": 59
+      }
+    ],
+    "C": [
+      {
+        "bbox": [
+          437,
+          1244,
+          507,
+          1329
+        ],
+        "height": 85,
+        "label": "C",
+        "label_index": 2,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/C/uppercase_letters_02_C.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "84d61e4df0ced7fcbfb1b8c9a67d1f949c2c904984d9ca38d53e593e412d30cd",
+        "width": 70
+      }
+    ],
+    "D": [
+      {
+        "bbox": [
+          585,
+          1244,
+          645,
+          1329
+        ],
+        "height": 85,
+        "label": "D",
+        "label_index": 3,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/D/uppercase_letters_03_D.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "93a9b447bf6a22fe83f5e689974d0e11e525233f8a81c7bdd9478cfe18df225b",
+        "width": 60
+      }
+    ],
+    "E": [
+      {
+        "bbox": [
+          739,
+          1244,
+          800,
+          1329
+        ],
+        "height": 85,
+        "label": "E",
+        "label_index": 4,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/E/uppercase_letters_04_E.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "12e50b2087643b65fda9d96e0814c9f51081682833629c88a643e7b1c86e776b",
+        "width": 61
+      }
+    ],
+    "F": [
+      {
+        "bbox": [
+          877,
+          1244,
+          939,
+          1329
+        ],
+        "height": 85,
+        "label": "F",
+        "label_index": 5,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/F/uppercase_letters_05_F.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "0215fa16e153bc78db6a9532d408963bcceec94cae9d3d92792b7ac5989ccebc",
+        "width": 62
+      }
+    ],
+    "G": [
+      {
+        "bbox": [
+          1033,
+          1244,
+          1097,
+          1329
+        ],
+        "height": 85,
+        "label": "G",
+        "label_index": 6,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/G/uppercase_letters_06_G.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "710100513fd6afca51ec7b16b2af50e710e643b5810bfb481788752f5d75c7de",
+        "width": 64
+      }
+    ],
+    "H": [
+      {
+        "bbox": [
+          1171,
+          1244,
+          1238,
+          1329
+        ],
+        "height": 85,
+        "label": "H",
+        "label_index": 7,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/H/uppercase_letters_07_H.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "d8267bfe23b1beff7780984cda23311f8fac5790fef7dc0fe08c31089773ea67",
+        "width": 67
+      }
+    ],
+    "I": [
+      {
+        "bbox": [
+          1293,
+          1244,
+          1354,
+          1329
+        ],
+        "height": 85,
+        "label": "I",
+        "label_index": 8,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/I/uppercase_letters_08_I.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "8657fd7ef049bee5f6eb71acb8c33a66d679e4e7b1516917729a2c3d55a25a1c",
+        "width": 61
+      }
+    ],
+    "J": [
+      {
+        "bbox": [
+          1417,
+          1244,
+          1489,
+          1329
+        ],
+        "height": 85,
+        "label": "J",
+        "label_index": 9,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/J/uppercase_letters_09_J.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "a3d78b08cc1233c3d3fb8abef821f99cb4fb8815c9c2381dbfcf72f311a2a2d3",
+        "width": 72
+      }
+    ],
+    "K": [
+      {
+        "bbox": [
+          1554,
+          1244,
+          1621,
+          1329
+        ],
+        "height": 85,
+        "label": "K",
+        "label_index": 10,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/K/uppercase_letters_10_K.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "4fe0f59d13e083ee7ab8265c12a340b3b61f66bf8a5a8b99a11c6482488b6e10",
+        "width": 67
+      }
+    ],
+    "L": [
+      {
+        "bbox": [
+          145,
+          1391,
+          208,
+          1478
+        ],
+        "height": 87,
+        "label": "L",
+        "label_index": 11,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/L/uppercase_letters_11_L.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "4352406166407ee411c345216819668665cfd6086827358941b14ed96246b6c7",
+        "width": 63
+      }
+    ],
+    "M": [
+      {
+        "bbox": [
+          284,
+          1391,
+          370,
+          1478
+        ],
+        "height": 87,
+        "label": "M",
+        "label_index": 12,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/M/uppercase_letters_12_M.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "fe3cc642da8675b7c50b7136419e781c3e0a839f53ef5fdd5df0525c0aa587e2",
+        "width": 86
+      }
+    ],
+    "N": [
+      {
+        "bbox": [
+          450,
+          1391,
+          525,
+          1478
+        ],
+        "height": 87,
+        "label": "N",
+        "label_index": 13,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/N/uppercase_letters_13_N.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "3c7fb6ce011c3d75b29568cf97ad46e81f7e89ffdcbe40f4016c5ce08734756f",
+        "width": 75
+      }
+    ],
+    "O": [
+      {
+        "bbox": [
+          586,
+          1391,
+          650,
+          1478
+        ],
+        "height": 87,
+        "label": "O",
+        "label_index": 14,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/O/uppercase_letters_14_O.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "60a4dc2330dbcdd4af28c35521d8ba662f5dbfb425ddb6b57a09460026ba0fea",
+        "width": 64
+      }
+    ],
+    "P": [
+      {
+        "bbox": [
+          747,
+          1391,
+          804,
+          1478
+        ],
+        "height": 87,
+        "label": "P",
+        "label_index": 15,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/P/uppercase_letters_15_P.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "fe101295b09eea2c0ffbec4f18ea73591d313b30e1cbdf8ad28fa337c728eead",
+        "width": 57
+      }
+    ],
+    "Q": [
+      {
+        "bbox": [
+          882,
+          1391,
+          951,
+          1478
+        ],
+        "height": 87,
+        "label": "Q",
+        "label_index": 16,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/Q/uppercase_letters_16_Q.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "b20e41fd8afd60e79082b7a79dbf05cff48080b65e490dadd8adf0ce3a47b420",
+        "width": 69
+      }
+    ],
+    "R": [
+      {
+        "bbox": [
+          1044,
+          1391,
+          1109,
+          1478
+        ],
+        "height": 87,
+        "label": "R",
+        "label_index": 17,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/R/uppercase_letters_17_R.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "8123885fe1c40f715a2e5e72daf9c7a517c3bcb1ccf405c5c7bd787c02351167",
+        "width": 65
+      }
+    ],
+    "S": [
+      {
+        "bbox": [
+          1186,
+          1391,
+          1244,
+          1478
+        ],
+        "height": 87,
+        "label": "S",
+        "label_index": 18,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/S/uppercase_letters_18_S.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "e7f231ab5291862395098da5d6e9d0fa7a90faca8708831dada72a6bb3ab472b",
+        "width": 58
+      }
+    ],
+    "T": [
+      {
+        "bbox": [
+          1293,
+          1391,
+          1361,
+          1478
+        ],
+        "height": 87,
+        "label": "T",
+        "label_index": 19,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/T/uppercase_letters_19_T.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "f363eabe4c2e48ef0574a8be2171893098cd2affe5a4f8cd75c2bc9a51a95ae6",
+        "width": 68
+      }
+    ],
+    "U": [
+      {
+        "bbox": [
+          1431,
+          1391,
+          1499,
+          1478
+        ],
+        "height": 87,
+        "label": "U",
+        "label_index": 20,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/U/uppercase_letters_20_U.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "ff121363587ac831418d8e9045472a886c928fcf3e9a5de3242e6793dd6cd6a4",
+        "width": 68
+      }
+    ],
+    "V": [
+      {
+        "bbox": [
+          1540,
+          1391,
+          1607,
+          1478
+        ],
+        "height": 87,
+        "label": "V",
+        "label_index": 21,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/V/uppercase_letters_21_V.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "d2a79632eeaf36968cabd20940ff88b7534aa9df9df0c7d137ca0554ef5a4896",
+        "width": 67
+      }
+    ],
+    "W": [
+      {
+        "bbox": [
+          138,
+          1546,
+          224,
+          1630
+        ],
+        "height": 84,
+        "label": "W",
+        "label_index": 22,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/W/uppercase_letters_22_W.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "c8064df6212f3c726026e0e673e6d352145d9bb057cb64975d263a34b6a028af",
+        "width": 86
+      }
+    ],
+    "X": [
+      {
+        "bbox": [
+          324,
+          1546,
+          389,
+          1630
+        ],
+        "height": 84,
+        "label": "X",
+        "label_index": 23,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/X/uppercase_letters_23_X.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "ff62cea93dbf902867664b00d77cea7a96a7722a18e722a5ae17e948fc5b44ee",
+        "width": 65
+      }
+    ],
+    "Y": [
+      {
+        "bbox": [
+          494,
+          1546,
+          558,
+          1630
+        ],
+        "height": 84,
+        "label": "Y",
+        "label_index": 24,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/Y/uppercase_letters_24_Y.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "46a661b113e0e95b473e89d79bcaf9d6e1d3dffea1c16e0dda19ed434df9f79f",
+        "width": 64
+      }
+    ],
+    "Z": [
+      {
+        "bbox": [
+          651,
+          1546,
+          714,
+          1630
+        ],
+        "height": 84,
+        "label": "Z",
+        "label_index": 25,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/Z/uppercase_letters_25_Z.png",
+        "row_id": "uppercase_letters",
+        "row_index": 4,
+        "sha256": "b2f1a8e783c4405f8d99a341b122ffc0c6349e21df08de51d2880d529819410b",
+        "width": 63
+      }
+    ],
+    "[": [
+      {
+        "bbox": [
+          991,
+          236,
+          1051,
+          327
+        ],
+        "height": 91,
+        "label": "[",
+        "label_index": 11,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/lbracket/punctuation_operators_11_lbracket.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "63f747a974a91a824daf331bb49496e2ed6f6398fb1201244fe68f1159aba01f",
+        "width": 60
+      }
+    ],
+    "]": [
+      {
+        "bbox": [
+          1064,
+          236,
+          1117,
+          327
+        ],
+        "height": 91,
+        "label": "]",
+        "label_index": 12,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/rbracket/punctuation_operators_12_rbracket.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "6076eabdabd546d10640fafa8c90810d43e1b102338da06c82a992929fe26124",
+        "width": 53
+      }
+    ],
+    "_": [
+      {
+        "bbox": [
+          455,
+          380,
+          524,
+          462
+        ],
+        "height": 82,
+        "label": "_",
+        "label_index": 21,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/underscore/punctuation_operators_21_underscore.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "f59e648049b1b2246a4e61e908471e5141d03490809e74145f776e177700b6bd",
+        "width": 69
+      }
+    ],
+    "a": [
+      {
+        "bbox": [
+          140,
+          767,
+          205,
+          856
+        ],
+        "height": 89,
+        "label": "a",
+        "label_index": 0,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/a/lowercase_letters_00_a.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "f647cc429a8f66b067c3f8b96df51582498ebbd1e0d50f6793b7dc68e099ef0a",
+        "width": 65
+      }
+    ],
+    "alpha": [
+      {
+        "bbox": [
+          134,
+          529,
+          208,
+          614
+        ],
+        "height": 85,
+        "label": "alpha",
+        "label_index": 0,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/alpha/greek_symbols_00_alpha.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "97df27493cf533bcff4ca95f6e2c4ae4d59094debdb9909a23c68fad92c70d26",
+        "width": 74
+      }
+    ],
+    "b": [
+      {
+        "bbox": [
+          273,
+          767,
+          329,
+          856
+        ],
+        "height": 89,
+        "label": "b",
+        "label_index": 1,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/b/lowercase_letters_01_b.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "a3aaf1e6a355e531a58110f0beb5f67cce4e803b043a55f17d569507135c8a2a",
+        "width": 56
+      }
+    ],
+    "beta": [
+      {
+        "bbox": [
+          264,
+          529,
+          329,
+          614
+        ],
+        "height": 85,
+        "label": "beta",
+        "label_index": 1,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/beta/greek_symbols_01_beta.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "a46c8c9f1b456c86189599e4d3b4facaa2cdb25c9b58cdde46cd97b8f2800c9a",
+        "width": 65
+      }
+    ],
+    "c": [
+      {
+        "bbox": [
+          416,
+          767,
+          473,
+          856
+        ],
+        "height": 89,
+        "label": "c",
+        "label_index": 2,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/c/lowercase_letters_02_c.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "84522e957fe221422a34cbdc6fb0d95341171422b27df6e06f6273def9200438",
+        "width": 57
+      }
+    ],
+    "d": [
+      {
+        "bbox": [
+          556,
+          767,
+          618,
+          856
+        ],
+        "height": 89,
+        "label": "d",
+        "label_index": 3,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/d/lowercase_letters_03_d.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "b81d37fd1f5422d6e34e5d308a7ff850b5a3515549f513eee144af6bc06d13ef",
+        "width": 62
+      }
+    ],
+    "e": [
+      {
+        "bbox": [
+          709,
+          767,
+          768,
+          856
+        ],
+        "height": 89,
+        "label": "e",
+        "label_index": 4,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/e/lowercase_letters_04_e.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "687d9bf21af0ca4c03930550cafe79c0f6b58a7762b6870428cd180f7c3c56d8",
+        "width": 59
+      }
+    ],
+    "f": [
+      {
+        "bbox": [
+          847,
+          767,
+          902,
+          856
+        ],
+        "height": 89,
+        "label": "f",
+        "label_index": 5,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/f/lowercase_letters_05_f.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "cf7ad3c25e35dcdc700587fcf3b1e4f598372e00bf6bd410032c13f013b69dae",
+        "width": 55
+      }
+    ],
+    "g": [
+      {
+        "bbox": [
+          966,
+          767,
+          1030,
+          856
+        ],
+        "height": 89,
+        "label": "g",
+        "label_index": 6,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/g/lowercase_letters_06_g.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "8cff05a6625be6f659971fc724d00989414213f8058be181c167bf2d41d34273",
+        "width": 64
+      }
+    ],
+    "gamma": [
+      {
+        "label": "gamma",
+        "missing_crop": true,
+        "row_id": "greek_symbols"
+      }
+    ],
+    "h": [
+      {
+        "bbox": [
+          1098,
+          767,
+          1171,
+          856
+        ],
+        "height": 89,
+        "label": "h",
+        "label_index": 7,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/h/lowercase_letters_07_h.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "00ea4b4616510642903a5cae310f4956788641adb6dfd9ebdf3c68337a1bc53d",
+        "width": 73
+      }
+    ],
+    "i": [
+      {
+        "bbox": [
+          1246,
+          767,
+          1289,
+          856
+        ],
+        "height": 89,
+        "label": "i",
+        "label_index": 8,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/i/lowercase_letters_08_i.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "49170fb0641284eed4d96629f4e1267a7d339083e896d94405f393040d8baef0",
+        "width": 43
+      }
+    ],
+    "j": [
+      {
+        "bbox": [
+          1344,
+          767,
+          1399,
+          856
+        ],
+        "height": 89,
+        "label": "j",
+        "label_index": 9,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/j/lowercase_letters_09_j.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "f6da7cafcc83ba3c779553ab9778a5190e64dd3623cfc52928e1e1ec0c635021",
+        "width": 55
+      }
+    ],
+    "k": [
+      {
+        "bbox": [
+          1451,
+          767,
+          1512,
+          856
+        ],
+        "height": 89,
+        "label": "k",
+        "label_index": 10,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/k/lowercase_letters_10_k.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "d40f834d7c8e11c92025c687509b032568fbcc4031d594e808f3826e487d99ea",
+        "width": 61
+      }
+    ],
+    "l": [
+      {
+        "bbox": [
+          1593,
+          767,
+          1635,
+          856
+        ],
+        "height": 89,
+        "label": "l",
+        "label_index": 11,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/l/lowercase_letters_11_l.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "0644910a18022282bbcc1fd8e3b7a3d3c1d5e85f9900534647536310a44f4bef",
+        "width": 42
+      }
+    ],
+    "lambda": [
+      {
+        "bbox": [
+          561,
+          529,
+          626,
+          614
+        ],
+        "height": 85,
+        "label": "lambda",
+        "label_index": 3,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/lambda/greek_symbols_03_lambda.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "eaa364ff3c2ab624283a9405995d200c326fca60f47d234e636e500d448bbcad",
+        "width": 65
+      }
+    ],
+    "m": [
+      {
+        "bbox": [
+          144,
+          922,
+          222,
+          1016
+        ],
+        "height": 94,
+        "label": "m",
+        "label_index": 12,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/m/lowercase_letters_12_m.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "0793db3cfdb73cbd03a110f0e5f2b079b4cd64e60d0f7879489d1335f9961c53",
+        "width": 78
+      }
+    ],
+    "mu": [
+      {
+        "bbox": [
+          716,
+          529,
+          783,
+          614
+        ],
+        "height": 85,
+        "label": "mu",
+        "label_index": 4,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/mu/greek_symbols_04_mu.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "262855a8e3f6c13dd4291e57ce0c17250b265c896983fb5d6d12e17c6df0225c",
+        "width": 67
+      }
+    ],
+    "n": [
+      {
+        "bbox": [
+          278,
+          922,
+          341,
+          1016
+        ],
+        "height": 94,
+        "label": "n",
+        "label_index": 13,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/n/lowercase_letters_13_n.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "fbc1c998c6de0564e18c6fe4c6ad01ab7687c65ed3281b48fee8c92938466a6e",
+        "width": 63
+      }
+    ],
+    "o": [
+      {
+        "bbox": [
+          412,
+          922,
+          474,
+          1016
+        ],
+        "height": 94,
+        "label": "o",
+        "label_index": 14,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/o/lowercase_letters_14_o.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "abe4d791f905c727ac821e86608107819e2e763c8101c882300d513c6ee88c2b",
+        "width": 62
+      }
+    ],
+    "p": [
+      {
+        "bbox": [
+          560,
+          922,
+          614,
+          1016
+        ],
+        "height": 94,
+        "label": "p",
+        "label_index": 15,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/p/lowercase_letters_15_p.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "726c17611d040684b9adc503e34b2dbe527d9e9900481f9d2956462a84359cf3",
+        "width": 54
+      }
+    ],
+    "pi": [
+      {
+        "bbox": [
+          856,
+          529,
+          938,
+          614
+        ],
+        "height": 85,
+        "label": "pi",
+        "label_index": 5,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/pi/greek_symbols_05_pi.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "ece369751b322d600a1f00b498569f33df411694dc6aa84c1ae066ce97cea4f8",
+        "width": 82
+      }
+    ],
+    "q": [
+      {
+        "bbox": [
+          718,
+          922,
+          779,
+          1016
+        ],
+        "height": 94,
+        "label": "q",
+        "label_index": 16,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/q/lowercase_letters_16_q.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "23215480336a01f23dc5597e1c7f108edc21452a725220349188483addaa21c6",
+        "width": 61
+      }
+    ],
+    "r": [
+      {
+        "bbox": [
+          850,
+          922,
+          904,
+          1016
+        ],
+        "height": 94,
+        "label": "r",
+        "label_index": 17,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/r/lowercase_letters_17_r.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "addb5739f99d06569c2c765b88ed8f102f7a351b4c8e5717e4b440160750531a",
+        "width": 54
+      }
+    ],
+    "s": [
+      {
+        "bbox": [
+          981,
+          922,
+          1037,
+          1016
+        ],
+        "height": 94,
+        "label": "s",
+        "label_index": 18,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/s/lowercase_letters_18_s.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "bf553540310c54138d587cdcf3182f00e554bf65ec4222c34cb6e3fa6c6621ce",
+        "width": 56
+      }
+    ],
+    "sigma": [
+      {
+        "bbox": [
+          1003,
+          529,
+          1091,
+          614
+        ],
+        "height": 85,
+        "label": "sigma",
+        "label_index": 6,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/sigma/greek_symbols_06_sigma.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "57e724ff0e92f9ccc5d8511ef33eda0ff7a9d8e38624315a200febcc9c36fb68",
+        "width": 88
+      }
+    ],
+    "t": [
+      {
+        "bbox": [
+          1096,
+          922,
+          1151,
+          1016
+        ],
+        "height": 94,
+        "label": "t",
+        "label_index": 19,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/t/lowercase_letters_19_t.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "3865ce028e6107cf86f9536a8a30fa737c1089b713480e526b0519c655a161b2",
+        "width": 55
+      }
+    ],
+    "theta": [
+      {
+        "bbox": [
+          403,
+          529,
+          464,
+          614
+        ],
+        "height": 85,
+        "label": "theta",
+        "label_index": 2,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/theta/greek_symbols_02_theta.png",
+        "row_id": "greek_symbols",
+        "row_index": 2,
+        "sha256": "08aa228a81ee0a46d599cf4cd16ff699693dac28bbaa2f56ea3ceab77cfca4b3",
+        "width": 61
+      }
+    ],
+    "u": [
+      {
+        "bbox": [
+          1240,
+          922,
+          1305,
+          1016
+        ],
+        "height": 94,
+        "label": "u",
+        "label_index": 20,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/u/lowercase_letters_20_u.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "f6865ee16e6b59accf25a043265dfdf14941f6663a5c3f8e375f0effc9f88a3d",
+        "width": 65
+      }
+    ],
+    "v": [
+      {
+        "bbox": [
+          1335,
+          922,
+          1399,
+          1016
+        ],
+        "height": 94,
+        "label": "v",
+        "label_index": 21,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/v/lowercase_letters_21_v.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "7293603d61e46c0c4b49cae5b2cdf5d2bf9184c3beebcd06d8241c0dd779610c",
+        "width": 64
+      }
+    ],
+    "w": [
+      {
+        "bbox": [
+          1441,
+          922,
+          1515,
+          1016
+        ],
+        "height": 94,
+        "label": "w",
+        "label_index": 22,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/w/lowercase_letters_22_w.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "25a761d520fad1c39242bdb440da03fe7854c3155ae646d0b70ba2cd4bfaa892",
+        "width": 74
+      }
+    ],
+    "x": [
+      {
+        "bbox": [
+          1590,
+          922,
+          1648,
+          1016
+        ],
+        "height": 94,
+        "label": "x",
+        "label_index": 23,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/x/lowercase_letters_23_x.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "293702378da5aea86c079bce309ad3c22dab4f5b533d837ccafb535a2ef0e3ad",
+        "width": 58
+      }
+    ],
+    "y": [
+      {
+        "bbox": [
+          148,
+          1079,
+          213,
+          1166
+        ],
+        "height": 87,
+        "label": "y",
+        "label_index": 24,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/y/lowercase_letters_24_y.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "3b30c26479476953eddf175fc7b0d595f8a9ee592eec78e24bad1449944a1503",
+        "width": 65
+      }
+    ],
+    "z": [
+      {
+        "bbox": [
+          288,
+          1079,
+          347,
+          1166
+        ],
+        "height": 87,
+        "label": "z",
+        "label_index": 25,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/z/lowercase_letters_25_z.png",
+        "row_id": "lowercase_letters",
+        "row_index": 3,
+        "sha256": "be4c1670587c4472caa92f15f14258a6ec0b7c92064fa8d9a50f39521c4c3996",
+        "width": 59
+      }
+    ],
+    "{": [
+      {
+        "bbox": [
+          1149,
+          236,
+          1204,
+          327
+        ],
+        "height": 91,
+        "label": "{",
+        "label_index": 13,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/lbrace/punctuation_operators_13_lbrace.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "0117730c4d985cc437d61eb23e5b63ff01063aeccc93abff21c3a60befa75244",
+        "width": 55
+      }
+    ],
+    "|": [
+      {
+        "bbox": [
+          559,
+          380,
+          602,
+          462
+        ],
+        "height": 82,
+        "label": "|",
+        "label_index": 22,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/bar/punctuation_operators_22_bar.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "3ce1a730318c86e0ddd3700d605e9e038f429574fca7d0715050928325a09b07",
+        "width": 43
+      }
+    ],
+    "}": [
+      {
+        "bbox": [
+          1222,
+          236,
+          1277,
+          327
+        ],
+        "height": 91,
+        "label": "}",
+        "label_index": 14,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/glyph_bank/rbrace/punctuation_operators_14_rbrace.png",
+        "row_id": "punctuation_operators",
+        "row_index": 1,
+        "sha256": "070e061de76534186c545b7e3425e574e54245170cd33da01be3279e620447f9",
+        "width": 55
+      }
+    ]
+  },
+  "known_limits": [
+    "Automatic row-to-template assignment assumes the worksheet follows the expected MVP row order.",
+    "Punctuation/operator crops should be visually reviewed before relying on dense math output."
+  ],
+  "local_source": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01.png",
+  "page_png": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/worksheet_page.png",
+  "page_size": [
+    1819,
+    2573
+  ],
+  "rows": [
+    {
+      "crop": {
+        "bbox": [
+          112,
+          86,
+          1513,
+          173
+        ],
+        "height": 87,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/rows/00_digits.png",
+        "sha256": "0046b6ad2517442b078d98552b0cd49969f8213e5928deed5e7a2ef33e76dd58",
+        "width": 1401
+      },
+      "detected_x_group_count": 10,
+      "id": "digits",
+      "index": 0,
+      "kind": "glyphs",
+      "label_count": 10,
+      "physical_row_count": 1,
+      "source_row_indices": [
+        0
+      ]
+    },
+    {
+      "crop": {
+        "bbox": [
+          122,
+          230,
+          1534,
+          468
+        ],
+        "height": 238,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/rows/01_punctuation_operators.png",
+        "sha256": "6d214c320961328808d1ea5037dfff023a0ff6da77faa0ff7def969a61d68ce7",
+        "width": 1412
+      },
+      "detected_x_group_count": 23,
+      "id": "punctuation_operators",
+      "index": 1,
+      "kind": "glyphs",
+      "label_count": 23,
+      "physical_row_count": 2,
+      "source_row_indices": [
+        1,
+        2
+      ]
+    },
+    {
+      "crop": {
+        "bbox": [
+          128,
+          523,
+          1097,
+          620
+        ],
+        "height": 97,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/rows/02_greek_symbols.png",
+        "sha256": "d179aac442cfc6db60b87b6037edfdf54881590b91e9bf13901f6220f6f07435",
+        "width": 969
+      },
+      "detected_label_sequence": [
+        "alpha",
+        "beta",
+        "theta",
+        "lambda",
+        "mu",
+        "pi",
+        "sigma"
+      ],
+      "detected_x_group_count": 7,
+      "id": "greek_symbols",
+      "index": 2,
+      "inferred_missing_labels": [
+        "gamma"
+      ],
+      "kind": "glyphs",
+      "label_count": 8,
+      "physical_row_count": 1,
+      "source_row_indices": [
+        3
+      ]
+    },
+    {
+      "crop": {
+        "bbox": [
+          134,
+          761,
+          1654,
+          1172
+        ],
+        "height": 411,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/rows/03_lowercase_letters.png",
+        "sha256": "4e54d524cd598c3fcd10a806bb12bf85f616f7a947e89473d311abfc7d8279f9",
+        "width": 1520
+      },
+      "detected_x_group_count": 26,
+      "id": "lowercase_letters",
+      "index": 3,
+      "kind": "glyphs",
+      "label_count": 26,
+      "physical_row_count": 3,
+      "source_row_indices": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "crop": {
+        "bbox": [
+          132,
+          1238,
+          1627,
+          1636
+        ],
+        "height": 398,
+        "path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01/rows/04_uppercase_letters.png",
+        "sha256": "1da350ed5ee548261f3e04a4339dd5534ca06c2d0448c6948f30ce01c90d29ba",
+        "width": 1495
+      },
+      "detected_x_group_count": 26,
+      "id": "uppercase_letters",
+      "index": 4,
+      "kind": "glyphs",
+      "label_count": 26,
+      "physical_row_count": 3,
+      "source_row_indices": [
+        7,
+        8,
+        9
+      ]
+    }
+  ],
+  "schema_version": "handgen_worksheet_manifest_v1",
+  "source_path": "/Users/arnavkulkarni/Developer/handgen/data/worksheets/writer_001/writer_001_worksheet_01.png",
+  "used_row_count": 5,
+  "writer_id": "writer_001"
+}
