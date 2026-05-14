@@ -17,6 +17,18 @@ class ParserTests(unittest.TestCase):
     def test_chunk_prose_by_words(self):
         self.assertEqual(chunk_prose("one two three four five", max_words=2), ["one two", "three four", "five"])
 
+    def test_chunk_prose_by_chars_preserves_words_when_possible(self):
+        self.assertEqual(
+            chunk_prose("alpha beta gamma delta", max_chars=12),
+            ["alpha beta", "gamma delta"],
+        )
+
+    def test_chunk_prose_by_chars_splits_overlong_token(self):
+        self.assertEqual(
+            chunk_prose("extraordinary proof", max_chars=8),
+            ["extraord", "inary", "proof"],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

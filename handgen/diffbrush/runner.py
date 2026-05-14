@@ -1,33 +1,51 @@
 from __future__ import annotations
 
+import gc
+import json
 import os
-import subprocess
 from pathlib import Path
 from typing import Any
 
 from ..paths import (
     DEFAULT_DIFFBRUSH_CHECKPOINT,
-    DEFAULT_DIFFBRUSH_PYTHON,
-    DEFAULT_DIFFBRUSH_RUNNER,
-    PACKAGE_ROOT,
+    DEFAULT_DIFFBRUSH_ROOT,
 )
 from ..utils import read_json, require_pillow_numpy, sha_text, sha_file
 from ..render.ink import soft_diffbrush_ink
+from .run_single import (
+    DiffBrushSingleRunner,
+    find_style_dir,
+    seed_everything,
+    select_device,
+)
 
 
 class DiffBrushRunner:
+    """In-process DiffBrush runner.
+
+    Builds models once on first use and reuses them for every subsequent
+    chunk/variable call within the lifetime of the instance.
+    """
+
     def __init__(self) -> None:
-        self.python = Path(os.environ.get("DIFFBRUSH_PYTHON", str(DEFAULT_DIFFBRUSH_PYTHON)))
-        self.runner = Path(os.environ.get("DIFFBRUSH_RUNNER", str(DEFAULT_DIFFBRUSH_RUNNER)))
+        os.environ.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
+        self.root = Path(os.environ.get("DIFFBRUSH_ROOT", str(DEFAULT_DIFFBRUSH_ROOT)))
         self.checkpoint = Path(os.environ.get("DIFFBRUSH_CHECKPOINT", str(DEFAULT_DIFFBRUSH_CHECKPOINT)))
-        self.device = os.environ.get("DIFFBRUSH_DEVICE", "auto")
+        self.device_request = os.environ.get("DIFFBRUSH_DEVICE", "auto")
         self.steps = int(os.environ.get("DIFFBRUSH_STEPS", "20"))
+        self.eta = float(os.environ.get("DIFFBRUSH_ETA", "0.0"))
+        self._inner: DiffBrushSingleRunner | None = None
+        self._inner_style_dir: Path | None = None
+        self._device = None
 
     def validate(self) -> None:
-        missing = [path for path in (self.python, self.runner, self.checkpoint) if not path.exists()]
+        missing = [p for p in (self.root, self.checkpoint) if not p.exists()]
         if missing:
-            joined = ", ".join(str(path) for path in missing)
-            raise RuntimeError(f"DiffBrush dependency path does not exist: {joined}")
+            raise RuntimeError(f"DiffBrush dependency path does not exist: {', '.join(str(p) for p in missing)}")
+
+    # ------------------------------------------------------------------
+    # Public generation API
+    # ------------------------------------------------------------------
 
     def generate_chunk(
         self,
@@ -60,7 +78,7 @@ class DiffBrushRunner:
             "sample": str(sample),
             "seed": result.get("seed", seed),
             "steps": result.get("steps", self.steps),
-            "device": result.get("device", self.device),
+            "device": result.get("device", self._device.type if self._device else self.device_request),
             "source_text_sha256": sha_text(text),
             "exactness_certified": False,
             "styled_crop": styled,
@@ -101,7 +119,7 @@ class DiffBrushRunner:
             "sample": str(sample),
             "seed": result.get("seed", seed),
             "steps": result.get("steps", self.steps),
-            "device": result.get("device", self.device),
+            "device": result.get("device", self._device.type if self._device else self.device_request),
             "source_text_sha256": sha_text(label),
             "exactness_certified": False,
             "styled_crop": best["styled_crop"],
@@ -109,6 +127,32 @@ class DiffBrushRunner:
             "component_variants": variants,
             "score": best["score"],
         }
+
+    # ------------------------------------------------------------------
+    # Core run method
+    # ------------------------------------------------------------------
+
+    def _ensure_inner(self, style_ref: Path):
+        style_dir = find_style_dir(style_ref)
+        if self._inner is not None and self._inner_style_dir == style_dir:
+            return self._inner
+        self.validate()
+        device = select_device(self.device_request)
+        try:
+            inner = DiffBrushSingleRunner(self.root, self.checkpoint, style_dir, device)
+        except Exception:
+            if device.type != "mps":
+                raise
+            gc.collect()
+            import torch
+            if hasattr(torch, "mps"):
+                torch.mps.empty_cache()
+            device = torch.device("cpu")
+            inner = DiffBrushSingleRunner(self.root, self.checkpoint, style_dir, device)
+        self._inner = inner
+        self._inner_style_dir = style_dir
+        self._device = device
+        return inner
 
     def _run(
         self,
@@ -121,50 +165,42 @@ class DiffBrushRunner:
         writer_id: str,
         conditioning_mode: str,
     ) -> Path:
-        self.validate()
         run_dir = out_dir / "diffbrush_runs" / span_id
         result_path = run_dir / "result.json"
         if result_path.exists():
             return result_path
+
         run_dir.mkdir(parents=True, exist_ok=True)
-        env = os.environ.copy()
-        env.setdefault("HF_HOME", str(PACKAGE_ROOT / ".cache" / "hf"))
-        env.setdefault("TORCH_HOME", str(PACKAGE_ROOT / ".cache" / "torch"))
-        env.setdefault("PYTORCH_ENABLE_MPS_FALLBACK", "1")
-        cmd = [
-            str(self.python),
-            str(self.runner),
-            "--prompt",
+        inner = self._ensure_inner(style_ref)
+        sample_path = run_dir / "sample.png"
+        seed_everything(seed)
+        inner.generate_one(
             prompt,
-            "--prompt-id",
-            span_id,
-            "--run-id",
-            span_id,
-            "--steps",
-            str(self.steps),
-            "--device",
-            self.device,
-            "--checkpoint",
-            str(self.checkpoint),
-            "--style-image",
-            str(style_ref),
-            "--writer-id",
-            writer_id,
-            "--seed",
-            str(seed),
-            "--conditioning-mode",
-            conditioning_mode,
-            "--out-dir",
-            str(run_dir),
-        ]
-        log_path = out_dir / "logs" / f"{span_id}.log"
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        with log_path.open("w", encoding="utf-8") as log:
-            log.write(" ".join(cmd) + "\n\n")
-            proc = subprocess.run(cmd, cwd=PACKAGE_ROOT, env=env, text=True, stdout=log, stderr=subprocess.STDOUT, check=False)
-        if proc.returncode != 0:
-            raise RuntimeError(f"DiffBrush failed for {span_id}; see {log_path}")
+            style_ref,
+            sample_path,
+            sampling_timesteps=self.steps,
+            eta=self.eta,
+        )
+        result = {
+            "prompt": prompt,
+            "prompt_id": span_id,
+            "run_id": span_id,
+            "writer_id": writer_id,
+            "conditioning_mode": conditioning_mode,
+            "seed": seed,
+            "steps": self.steps,
+            "device": self._device.type,
+            "repo_root": str(self.root),
+            "checkpoint": str(self.checkpoint),
+            "style_image": str(style_ref),
+            "outputs": {"sample": str(sample_path)},
+        }
+        result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
         return result_path
+
+    # ------------------------------------------------------------------
+    # Variable component extraction (unchanged behavior)
+    # ------------------------------------------------------------------
 
     def _variable_component_variants(self, label: str, sample: Path, out_dir: Path) -> list[dict[str, Any]]:
         Image, np = require_pillow_numpy()
