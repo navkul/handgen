@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 
 
 @dataclass(frozen=True)
@@ -26,6 +27,12 @@ class ParsePlan:
     source_text: str
     lines: tuple[ParsedLine, ...]
     spans: tuple[Span, ...]
+
+
+@dataclass(frozen=True)
+class ProseToken:
+    kind: str
+    text: str
 
 
 def parse_source(source_text: str) -> ParsePlan:
@@ -107,13 +114,36 @@ def chunk_prose(text: str, max_words: int = 6, max_chars: int | None = None) -> 
         if current:
             chunks.append(" ".join(current))
         return chunks
-    words = text.split()
-    if not words:
+    if not text.strip():
         return []
     chunks = []
-    for i in range(0, len(words), max_words):
-        chunks.append(" ".join(words[i : i + max_words]))
+    current = ""
+    word_count = 0
+    for match in re.finditer(r"\S+\s*", text):
+        token = match.group(0)
+        if word_count >= max_words and current:
+            chunks.append(current.strip())
+            current = ""
+            word_count = 0
+        current += token
+        word_count += 1
+    if current:
+        chunk = current.strip()
+        if chunk:
+            chunks.append(chunk)
     return chunks
+
+
+def tokenize_prose(text: str) -> list[ProseToken]:
+    tokens: list[ProseToken] = []
+    pos = 0
+    while pos < len(text):
+        start = pos
+        is_space = text[pos].isspace()
+        while pos < len(text) and text[pos].isspace() == is_space:
+            pos += 1
+        tokens.append(ProseToken(kind="space" if is_space else "text", text=text[start:pos]))
+    return tokens
 
 
 def plan_to_dict(plan: ParsePlan) -> dict:

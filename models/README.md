@@ -8,6 +8,8 @@ models/diffbrush/third_party_repo/model_zoo/DiffBrush-ckpt.pt
 
 `handgen` calls DiffBrush in-process through `handgen/diffbrush/runner.py`, which builds the model once per `document render` and reuses it across every prose chunk and variable in that render.
 
+The checkpoint is intentionally ignored by Git. Keep it on disk at the path above for local runs, but do not commit it.
+
 If you want to use a different checkout or keep weights outside this repo, override the paths through:
 
 ```bash

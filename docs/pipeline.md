@@ -25,13 +25,13 @@ python3 -m handgen style add writer_001 data/style_refs/writer_001/natural_prose
 Ingest a worksheet:
 
 ```bash
-python3 -m handgen worksheet ingest writer_001 data/worksheets/writer_001/symbol_worksheet_01.png
+python -m handgen worksheet ingest writer_001 data/worksheets/writer_001/writer_001_worksheet_01.png
 ```
 
 Render a document:
 
 ```bash
-python3 -m handgen document render writer_001 examples/mixed_proof.txt --out outputs/mixed_proof
+python -m handgen document render writer_001 examples/mixed_proof.txt --out outputs/mixed_proof
 ```
 
 ## Source Parsing
@@ -92,14 +92,23 @@ The worksheet manifest is the handoff between ingestion and rendering. It record
 
 Prose is generated with DiffBrush candidates and selected only after text verification. The current policy favors source preservation over visual novelty.
 
+Candidate search is controlled by environment variables:
+
+- `HANDGEN_DIFFBRUSH_PROSE_CANDIDATES`: number of candidates per prompt variant, default `4`.
+- `HANDGEN_DIFFBRUSH_LAST_RESORT_RETRIES`: extra attempts when no candidate clears the best-effort floor, default `2`.
+- `HANDGEN_DIFFBRUSH_ALLOW_BEST_EFFORT`: keep rendering a selected DiffBrush candidate when OCR cannot certify exactness, default enabled.
+- `HANDGEN_DIFFBRUSH_MIN_BEST_EFFORT_SCORE`: minimum OCR/token match score for best-effort selection before last-resort fallback, default `0.12`.
+
+The speed tradeoff is linear in generated candidates after the one-time model load is paid. On `examples/fragmented_math_full.txt` with `DIFFBRUSH_STEPS=20`, no last-resort retries, and the repo-local checkpoint, one candidate took `17.78s` wall time and four candidates took `42.09s` wall time. Four candidates was about `2.37x` slower for that example and can improve selection, but it does not guarantee OCR-perfect prose.
+
 The prose route records evidence such as source text hashes, candidate metadata, OCR or estimated word boxes, selected artifact paths, and exactness information in the manifest.
 
 ## Math Route
 
 Math spans use a mixed route:
 
-- Worksheet glyphs are used for digits, Greek, relation symbols, operators, and punctuation where available.
-- English variables may use isolated DiffBrush components generated from natural handwriting context.
+- Worksheet glyphs are used for ASCII variables, Greek, relation symbols, operators, and punctuation where available.
+- Digits currently use isolated DiffBrush connected components generated from natural handwriting context.
 - Symbols are normalized with ink and sizing profiles so worksheet crops blend with the prose style.
 - Each rendered math token records source character metadata for source reconstruction.
 
@@ -114,7 +123,7 @@ A render output directory may include:
 - `manifest.json`: machine-readable render manifest.
 - `source_contract_failed.json`: failure details when source preservation fails.
 - `diffbrush_runs/`: per-span DiffBrush inputs, outputs (`sample.png`), and `result.json`. One subdirectory per chunk or variable; all of them share the same in-memory model within a single render.
-- `prose/`, `prose_candidates/`, `variables/`, `math/`, `glyph_rgba/`: intermediate visual assets.
+- `prose/`, `prose_candidates/`, `variables/`, `math/`, `glyph_rgba/`, `glyph_variants/`: intermediate visual assets.
 - `logs/`: runtime logs and diagnostic output.
 
 ## Verification

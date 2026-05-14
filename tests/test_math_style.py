@@ -36,13 +36,15 @@ class MathStyleTests(unittest.TestCase):
                 "glyphs": {
                     "<": [{"path": str(op)}],
                     "2": [{"path": str(digit)}],
-                    "x": [{"path": str(var), "row_id": "math_letters"}],
+                    "x": [{"path": str(var), "row_id": "lowercase_letters"}],
                 }
             }
             profile = math_style_profile(style, manifest, prose_height=64.0)
             self.assertLess(profile["target_operator_height"], profile["target_variable_height"])
             self.assertIn("operator_to_prose_ratio", profile)
             self.assertEqual(profile["max_diffbrush_variable_upscale"], 1.45)
+            self.assertIn("symbol_alpha_scale", profile)
+            self.assertIn("target_token_gap", profile)
 
 
 if __name__ == "__main__":

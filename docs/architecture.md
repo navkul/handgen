@@ -39,17 +39,18 @@ The current rendering split is:
 
 - Prose outside `[[...]]` routes through source-locked DiffBrush generation.
 - Math spans inside `[[...]]` route through math-aware rendering.
-- English variables may use DiffBrush context/component generation when isolated glyphs are needed.
-- Digits, Greek, relation symbols, operators, and punctuation should route through worksheet glyph-bank composition.
+- Inline ASCII variables route through worksheet glyph-bank composition.
+- Greek, relation symbols, operators, and punctuation route through worksheet glyph-bank composition.
+- Digits currently use isolated DiffBrush connected components and are called out as a known MVP limit.
 - Raw DiffBrush math should not be treated as reliable source-preserving math output.
 
 ## External Dependencies
 
-DiffBrush is referenced from the neighboring research checkout by default:
+DiffBrush is vendored into this repo by default:
 
-- `../04_cpu_neural_scout/vendor/DiffBrush`
-- `../04_cpu_neural_scout/vendor/DiffBrush/model_zoo/DiffBrush-ckpt.pt`
-- `../04_cpu_neural_scout/code/run_diffbrush_single.py`
+- `models/diffbrush/third_party_repo/`
+- `models/diffbrush/third_party_repo/model_zoo/DiffBrush-ckpt.pt`
+- `handgen/diffbrush/run_single.py`
 
 Runtime overrides are supported with:
 
@@ -57,6 +58,7 @@ Runtime overrides are supported with:
 - `DIFFBRUSH_CHECKPOINT`
 - `DIFFBRUSH_DEVICE` (default `auto`; falls back from `mps` to `cpu` on failure)
 - `DIFFBRUSH_STEPS` (default `20` DDIM sampling steps)
+- `HANDGEN_DIFFBRUSH_PROSE_CANDIDATES` (default `4`; more candidates improve selection opportunities but increase render time)
 
 DiffBrush is invoked in-process. The model is built once on the first generate call in a render and held in memory for the rest of that render, so each subsequent chunk avoids the model-load cost. This replaces the earlier subprocess-per-chunk approach and is roughly 3.75× faster end-to-end on a 3-chunk test.
 
@@ -64,7 +66,7 @@ Image processing depends on Pillow and NumPy. PNG export depends on `rsvg-conver
 
 ## Safety and Scope Constraints
 
-Do not add deployed-product infrastructure until the local CLI pipeline is reliable. Do not commit model weights, generated output directories, local SQLite databases, or unrelated research workspace changes. Reusable writer assets and worksheet-derived crops may be committed only when they are safe to share.
+Do not add deployed-product infrastructure until the local CLI pipeline is reliable. Do not commit model weights, generated output directories, local SQLite databases, virtual environments, or unrelated research workspace changes. Reusable writer assets and worksheet-derived crops may be committed only when they are safe to share.
 
 ## Documentation Update Example
 

@@ -1,6 +1,6 @@
 import unittest
 
-from handgen.parser import chunk_prose, parse_source
+from handgen.parser import chunk_prose, parse_source, tokenize_prose
 
 
 class ParserTests(unittest.TestCase):
@@ -28,6 +28,11 @@ class ParserTests(unittest.TestCase):
             chunk_prose("extraordinary proof", max_chars=8),
             ["extraord", "inary", "proof"],
         )
+
+    def test_tokenize_prose_preserves_whitespace(self):
+        tokens = tokenize_prose("one  two\tthree")
+        self.assertEqual([token.kind for token in tokens], ["text", "space", "text", "space", "text"])
+        self.assertEqual("".join(token.text for token in tokens), "one  two\tthree")
 
 
 if __name__ == "__main__":
