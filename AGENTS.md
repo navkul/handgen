@@ -55,6 +55,27 @@ Do not add a frontend, web backend, subscription system, auth, cloud storage, or
 - Preserve exact source text in sidecars even when DiffBrush prose is not visually exact.
 - Do not present raw DiffBrush math as correct; English variables may route through DiffBrush context-component generation, while digits, Greek, and relation/operator symbols should route through worksheet glyph-bank composition.
 
+## Documentation Rules
+
+The docs in `docs/` are part of the product state, not optional notes. For every commit, check whether the code, data contracts, pipeline behavior, assumptions, tradeoffs, or known findings changed. If they did, update the relevant docs in the same commit.
+
+This does not mean every commit needs a new doc entry. It means the committed docs must describe the current codebase after the commit lands.
+
+Current docs:
+
+- `docs/architecture.md` describes system boundaries, core components, persistence, rendering routes, external dependencies, and scope constraints.
+- `docs/pipeline.md` describes the end-to-end CLI, ingestion, rendering, output, and verification flow.
+- `docs/findings.md` records current empirical findings, limitations, open questions, and resolved understanding.
+- `docs/decisions.md` records durable decisions and tradeoffs. It is not a changelog.
+
+Examples:
+
+- If a commit changes worksheet row detection, update `docs/pipeline.md` if the ingestion flow changed and `docs/findings.md` if the supported worksheet assumptions changed.
+- If a commit changes where digits, Greek, operators, or variables are rendered from, update `docs/architecture.md`, `docs/pipeline.md`, and the relevant decision in `docs/decisions.md`.
+- If a commit changes manifest fields, source-contract behavior, or OCR gating, update `docs/pipeline.md` and `docs/decisions.md` if the source-preservation contract changed.
+- If a commit only renames a private helper or reformats code without changing behavior, no docs edit is required.
+- Do not add `CHANGELOG.md` until the project has versioned releases, external users, or a standalone package boundary.
+
 ## Useful Commands
 
 ```bash
