@@ -13,6 +13,7 @@ The product direction is a subscription site where users can turn ordinary sourc
 - `handgen/cli.py` exposes the local CLI commands and connects the database, filesystem assets, worksheet ingestion, and document rendering.
 - `handgen/db.py` owns the SQLite schema and metadata helpers.
 - `handgen/parser.py` parses source text and `[[...]]` math spans into a render plan that preserves source text.
+- `handgen/chunking.py` provides prose chunking strategies (`current`, `balanced_dp`, `punctuation_first`, `variable_length_sampling`). `balanced_dp` is the production default used by `handgen document render` for prose-only renders; the others remain reachable through the chunk_compare harness for A/B benchmarking.
 - `handgen/ingest/worksheet.py` rasterizes worksheet inputs and extracts labeled glyph-bank crops.
 - `handgen/diffbrush/runner.py` loads the DiffBrush model in-process and reuses it across every prose chunk and variable in a render, plus candidate generation, OCR reranking, and isolated component extraction.
 - `handgen/render/document.py` orchestrates document rendering, source-preservation checks, SVG composition, PNG export, and output manifests.
@@ -61,6 +62,8 @@ Runtime overrides are supported with:
 - `HANDGEN_DIFFBRUSH_PROSE_CANDIDATES` (default `4`; more candidates improve selection opportunities but increase render time)
 
 DiffBrush is invoked in-process. The model is built once on the first generate call in a render and held in memory for the rest of that render, so each subsequent chunk avoids the model-load cost. This replaces the earlier subprocess-per-chunk approach and is roughly 3.75× faster end-to-end on a 3-chunk test.
+
+DiffBrush is a diffusion model: each generation is dozens of UNet denoising passes that gradually turn random noise into a coherent handwritten line. Per-chunk cost is therefore dominated by diffusion sampling, which is heavily device-dependent — M-series MPS is 3–20× slower than cloud CUDA GPUs for this workload. Production will move DiffBrush behind a persistent GPU service (see `docs/decisions.md`).
 
 Image processing depends on Pillow and NumPy. PNG export depends on `rsvg-convert` being available at runtime.
 
