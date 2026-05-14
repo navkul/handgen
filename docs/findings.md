@@ -22,7 +22,35 @@ DiffBrush can produce useful handwriting-like prose, but generated text can drif
 
 The current default generates four candidates per prompt variant. In a fresh benchmark of `examples/fragmented_math_full.txt` with `DIFFBRUSH_STEPS=20` and no last-resort retries, one candidate took `17.78s` wall time while four candidates took `42.09s`. That is about `2.37x` slower for this document. Candidate search can improve the selected line, but OCR still sees some low-quality lines, so higher candidate counts are a quality/runtime knob rather than a correctness guarantee.
 
+The current OCR gate (tesseract token comparison) is a fairly weak content check. A stronger inference-time verification — running HTR/OCR on every candidate, scoring against the target text, and regenerating failed chunks — is the most direct next step to suppress repeated and drifted words. The DiffBrush paper's discriminators only help at training time; inference has no hard content check today.
+
 Implication: visual quality improvements should not bypass source-locking checks unless the replacement verification strategy is documented. Candidate-count changes should be benchmarked because they directly trade runtime for selection quality.
+
+### Prose chunk size matters because DiffBrush is trained on IAM-line-shaped prompts
+
+DiffBrush's training distribution is IAM handwriting lines, which cluster around ~30–50 characters. Empirically, asking it to render 20- or 30-char chunks produces *more* repeated words than 40-char chunks, not fewer — the model is most reliable when the prompt looks like what it was trained on. Shorter is not safer.
+
+`handgen/chunking.py` provides four prose chunking strategies (`current`, `balanced_dp`, `punctuation_first`, `variable_length_sampling`) and `handgen/eval/chunk_compare.py` renders side-by-side comparisons. In a 5-sentence benchmark on writer_002, the DP and punctuation-first splitters both eliminated repeats *and* lifted average OCR match score by ~33% versus the greedy splitter — mostly by killing the small orphan tail chunks (7–18 chars) that the greedy splitter emits at sentence ends.
+
+`balanced_dp` is the production default for prose-only renders as of 2026-05-14 (see `docs/decisions.md`). The greedy chunker remains reachable as an escape hatch via `--max-chars`. Carrier/slot lines still use their own `_chunk_carrier` splitter; this finding only governs the pure-prose path.
+
+Implication: chunking should target ~42 chars per chunk, never split words, and avoid tiny tails. Future improvements should pursue *semantically* coherent chunks (clause/punctuation boundaries, overlap/context windows) rather than just smaller ones.
+
+### Chunking algorithm runtime is negligible — optimize for correctness
+
+The four chunking strategies range from O(n) greedy to O(n²) DP. On benchmark sentences the DP is ~2.2× slower than the variable-length sampler — but in absolute terms that's 27 µs vs 12 µs per sentence. Total render time is dominated by diffusion sampling (seconds per chunk), so chunker complexity is rounding error.
+
+Implication: pick chunking strategies on output quality alone. Do not optimize chunking for speed at the cost of structure.
+
+### Diffusion sampling dominates runtime; persistent GPU is the production path
+
+DiffBrush is a diffusion model — generation is dozens of denoising steps (a UNet forward pass per step) that gradually turn random noise into a coherent handwritten line, not a single forward pass. This is why every chunk costs ~1–3 seconds on M-series MPS even after the model is loaded.
+
+In a recent run of `handgen/eval/chunk_compare.py` (5 sentences × 4 strategies, writer_002), the harness took ~30 minutes wall-clock: 73 prose chunks × 5.7 average DiffBrush candidates per chunk = 416 diffusion sampling passes. None of the 73 chunks passed OCR exactness on the first candidate for this writer's style, so the runner walked the full candidate budget every time.
+
+A single mid-tier cloud GPU (L4, A10G) typically runs Stable-Diffusion-class UNets 3–5× faster than M-series MPS at batch size 1. An A100 is ~10–15×, an H100 ~20×. The same 30-minute local run would be roughly 1–3 minutes on an L4/A10G, and under a minute on an A100 with batched candidate generation. Batching the 4 per-chunk candidates into a single forward pass (currently sequential in the runner) is an additional ~4× available on CUDA but not on MPS.
+
+Implication: when moving toward production, host DiffBrush as a persistent GPU service that keeps the model in memory and accepts text+style requests, rather than per-job model loads (see `docs/decisions.md`). Tesseract OCR is CPU-only and will become a meaningful share of remaining time after GPU speedup — worth parallelizing per-candidate.
 
 ### Raw DiffBrush math is not trusted as exact math
 
@@ -49,6 +77,9 @@ Implication: rendering changes should preserve enough manifest and SVG detail to
 - What is the right threshold for accepting OCR-verified prose candidates versus falling back to estimated layout?
 - How should longer documents paginate while keeping manifests easy to inspect?
 - When the repo becomes standalone, which generated sample assets should remain committed as fixtures?
+- Can semantically coherent chunking (clause boundaries, conjunction breaks, phrase units) reduce repetition further than purely length-based splitting?
+- Does overlap/context chunking — generating each chunk with a few neighboring words and keeping only the intended center or suffix — help DiffBrush avoid mid-sentence resets?
+- Would an HTR-based content gate (replacing or augmenting tesseract) raise the OCR-exactness rate enough to make the candidate budget elastic instead of always-exhausted?
 
 ## Documentation Update Example
 
