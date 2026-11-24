@@ -1,0 +1,1 @@
+"""Optional VATr++ word synthesis."""

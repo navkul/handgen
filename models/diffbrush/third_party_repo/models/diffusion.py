@@ -221,6 +221,9 @@ class Diffusion:
     @torch.no_grad()
     def ddim_sample(self, model, vae, n, x, styles, content, sampling_timesteps=50, eta=0):
         model.eval()
+        # In evaluation mode this encoder depends only on the reference and
+        # transcription. All denoising steps in this line share its output.
+        context = model.mix_net.generate(styles, content)
         
         total_timesteps, sampling_timesteps = self.noise_steps, sampling_timesteps
         times = torch.linspace(-1, total_timesteps - 1, steps = sampling_timesteps + 1)   # [-1, 0, 1, 2, ..., T-1] when sampling_timesteps == total_timesteps
@@ -232,7 +235,7 @@ class Diffusion:
         for time, time_next in time_pairs:
             time = (torch.ones(n) * time).long().to(self.device)
             time_next = (torch.ones(n) * time_next).long().to(self.device)
-            predicted_noise = model(x, time, styles, content)
+            predicted_noise = model(x, time, styles, content, context=context)
             
             beta = self.beta[time][:, None, None, None]
             alpha_hat = self.alpha_hat[time][:, None, None, None]

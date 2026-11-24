@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import gc
+import hashlib
 import json
 import os
 import shutil
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 from ..eval.ocr import ocr_image, ocr_legibility_score, ocr_word_boxes, verify_ocr_text
@@ -12,8 +14,14 @@ from ..paths import (
     DEFAULT_DIFFBRUSH_CHECKPOINT,
     DEFAULT_DIFFBRUSH_ROOT,
 )
-from ..utils import read_json, require_pillow_numpy, sha_text, sha_file
 from ..render.ink import rgba_ink_profile, soft_diffbrush_ink, trim_rgba_right
+from ..utils import read_json, require_pillow_numpy, sha_file, sha_text
+from . import DiffBrushUnavailable
+from .prompt import canvas_width, model_text
+
+
+class ProseVerificationError(RuntimeError):
+    """DiffBrush could not deliver a verified rendering of a source fragment."""
 
 
 def _normalize_prompt_variants(prompt_text: str | list[str] | tuple[str, ...] | None, text: str) -> list[str]:
@@ -28,6 +36,15 @@ def _normalize_prompt_variants(prompt_text: str | list[str] | tuple[str, ...] | 
 
 def _prompt_seed_offset(prompt: str) -> int:
     return int(sha_text(prompt)[:8], 16) % 100_003
+
+
+def _context_prompt(text: str) -> str:
+    prompt = text.strip()
+    for word in ["and", "then", "we", "can", "continue", "with", "the", "next", "part", "of", "the", "notes"]:
+        prompt += " " + word
+        if len(prompt) >= 42:
+            break
+    return prompt
 
 
 def _viable_best_effort_candidates(candidates: list[dict[str, Any]], min_score: float) -> list[dict[str, Any]]:
@@ -53,8 +70,10 @@ class DiffBrushRunner:
         self.steps = int(os.environ.get("DIFFBRUSH_STEPS", "20"))
         self.eta = float(os.environ.get("DIFFBRUSH_ETA", "0.0"))
         self._inner: Any | None = None
-        self._inner_style_dir: Path | None = None
+        self.style_refs: tuple[Path, ...] = ()
         self._device = None
+        self._weight_identity: tuple[Path, int, int, str] | None = None
+        self._style_readings: dict[tuple[Path, str | None], dict[str, Any]] = {}
         self.prose_candidates = int(os.environ.get("HANDGEN_DIFFBRUSH_PROSE_CANDIDATES", "4"))
         self.allow_best_effort = os.environ.get("HANDGEN_DIFFBRUSH_ALLOW_BEST_EFFORT", "1") != "0"
         self.min_best_effort_score = float(os.environ.get("HANDGEN_DIFFBRUSH_MIN_BEST_EFFORT_SCORE", "0.12"))
@@ -64,7 +83,9 @@ class DiffBrushRunner:
     def validate(self) -> None:
         missing = [p for p in (self.root, self.checkpoint) if not p.exists()]
         if missing:
-            raise RuntimeError(f"DiffBrush dependency path does not exist: {', '.join(str(p) for p in missing)}")
+            raise DiffBrushUnavailable(f"DiffBrush dependency path does not exist: {', '.join(str(p) for p in missing)}")
+        if not 1 <= self.steps <= 1000 or not 0.0 <= self.eta <= 1.0:
+            raise ValueError("Set DIFFBRUSH_STEPS between 1 and 1000 and DIFFBRUSH_ETA between 0 and 1")
 
     # ------------------------------------------------------------------
     # Public generation API
@@ -81,68 +102,53 @@ class DiffBrushRunner:
         seed: int,
         writer_id: str,
     ) -> dict[str, Any]:
+        try:
+            model_text(text)
+        except ValueError as error:
+            raise ProseVerificationError(str(error)) from error
         prompt_variants = _normalize_prompt_variants(prompt_text, text)
+        references = self.style_refs or (style_ref,)
         candidates: list[dict[str, Any]] = []
-        style_legibility = ocr_legibility_score(style_ref, psm=7)
+        ref_key = (style_ref.resolve(), sha_file(style_ref) if style_ref.is_file() else None)
+        if ref_key not in self._style_readings:
+            self._style_readings[ref_key] = ocr_legibility_score(style_ref, psm=7) | {"reference": str(style_ref)}
+        style_legibility = self._style_readings[ref_key]
         effective_min_score = self._effective_best_effort_score(style_legibility)
-        for prompt_idx, candidate_prompt in enumerate(prompt_variants):
-            for idx in range(max(1, self.prose_candidates)):
+        regular_count = max(1, self.prose_candidates)
+        for idx in range(regular_count + max(0, self.last_resort_retries)):
+            if idx == regular_count and self.allow_best_effort and _viable_best_effort_candidates(candidates, effective_min_score):
+                break
+            for prompt_idx, candidate_prompt in enumerate(prompt_variants):
+                # In a short line the model can fill the remaining canvas with
+                # repetitions. Give alternate seeds a line-length context, then
+                # read the cropped prefix independently of that context.
+                if prompt_text is None and idx % 2 == 1 and len(text.strip()) <= 26:
+                    candidate_prompt = _context_prompt(text)
                 candidate_seed = seed + _prompt_seed_offset(candidate_prompt) + idx * 1009
-                candidate_id = f"{span_id}_cand{idx:02d}" if len(prompt_variants) == 1 else f"{span_id}_p{prompt_idx:02d}_cand{idx:02d}"
+                if len(prompt_variants) == 1:
+                    candidate_id = f"{span_id}_cand{idx:02d}"
+                else:
+                    candidate_id = f"{span_id}_p{prompt_idx:02d}_cand{idx:02d}"
                 candidate = self._generate_candidate(
-                    candidate_id=candidate_id,
-                    span_id=span_id,
-                    text=text,
-                    prompt_text=candidate_prompt,
-                    style_ref=style_ref,
-                    out_dir=out_dir,
-                    seed=candidate_seed,
-                    writer_id=writer_id,
+                    candidate_id=candidate_id, span_id=span_id, text=text,
+                    prompt_text=candidate_prompt, style_ref=references[(seed + idx) % len(references)],
+                    out_dir=out_dir, seed=candidate_seed, writer_id=writer_id,
                 )
                 candidates.append(candidate)
                 if candidate["accepted"]:
                     return self._finalize_candidate(
-                        span_id=span_id,
-                        text=text,
-                        candidate=candidate,
-                        style_legibility=style_legibility,
-                        candidates=candidates,
-                        exactness_certified=True,
-                        route="diffbrush_ocr_verified_prose_token",
+                        span_id=span_id, text=text, candidate=candidate,
+                        style_legibility=style_legibility, candidates=candidates,
+                        exactness_certified=True, route="diffbrush_ocr_verified_prose_token",
                     )
         if self.allow_best_effort and candidates:
-            if self.last_resort_retries > 0 and not _viable_best_effort_candidates(candidates, effective_min_score):
-                retry_start = max(1, self.prose_candidates)
-                for prompt_idx, candidate_prompt in enumerate(prompt_variants):
-                    for retry_idx in range(self.last_resort_retries):
-                        idx = retry_start + retry_idx
-                        candidate_seed = seed + _prompt_seed_offset(candidate_prompt) + idx * 1009
-                        candidate_id = f"{span_id}_cand{idx:02d}" if len(prompt_variants) == 1 else f"{span_id}_p{prompt_idx:02d}_cand{idx:02d}"
-                        candidate = self._generate_candidate(
-                            candidate_id=candidate_id,
-                            span_id=span_id,
-                            text=text,
-                            prompt_text=candidate_prompt,
-                            style_ref=style_ref,
-                            out_dir=out_dir,
-                            seed=candidate_seed,
-                            writer_id=writer_id,
-                        )
-                        candidates.append(candidate)
-                        if candidate["accepted"]:
-                            return self._finalize_candidate(
-                                span_id=span_id,
-                                text=text,
-                                candidate=candidate,
-                                style_legibility=style_legibility,
-                                candidates=candidates,
-                                exactness_certified=True,
-                                route="diffbrush_ocr_verified_prose_token",
-                            )
-            candidates.sort(key=lambda item: (item.get("selection_score", item.get("score", 0.0)), len(item["ocr"]["text"])), reverse=True)
+            candidates.sort(key=lambda item: item["selection_score"], reverse=True)
             clean_candidates = [item for item in candidates if not item.get("quality_reject_reasons")]
+            if not clean_candidates:
+                reasons = sorted({reason for item in candidates for reason in item["quality_reject_reasons"]})
+                raise ProseVerificationError(f"DiffBrush produced no usable ink for {text!r}: {', '.join(reasons)}")
             viable = [item for item in clean_candidates if float(item.get("score", 0.0) or 0.0) >= effective_min_score]
-            best = viable[0] if viable else (clean_candidates[0] if clean_candidates else candidates[0])
+            best = viable[0] if viable else clean_candidates[0]
             last_resort = not viable
             run = self._finalize_candidate(
                 span_id=span_id,
@@ -157,9 +163,9 @@ class DiffBrushRunner:
             run["best_effort_effective_min_score"] = effective_min_score
             run["adaptive_last_resort_retries"] = self.last_resort_retries
             run["best_effort_reason"] = (
-                "No candidate passed OCR exactness; selected the highest token-match candidate above the configured best-effort floor."
+                "This crop had the strongest OCR match above the configured best-effort threshold."
                 if not last_resort
-                else "No candidate passed OCR exactness or the configured best-effort floor; selected the highest non-quality-rejected DiffBrush candidate when available as a last resort so the render contains no non-DiffBrush natural-language fallback."
+                else "The highest-scoring usable crop fell below the configured OCR match threshold."
             )
             return run
         reject_summary = [
@@ -171,7 +177,7 @@ class DiffBrushRunner:
             }
             for item in candidates
         ]
-        raise RuntimeError(f"DiffBrush produced no OCR-verified prose candidate for {text!r}: {reject_summary}")
+        raise ProseVerificationError(f"DiffBrush produced no OCR-verified prose candidate for {text!r}: {reject_summary}")
 
     def _effective_best_effort_score(self, style_legibility: dict[str, Any]) -> float:
         style_score = float(style_legibility.get("score", 0.0) or 0.0)
@@ -216,9 +222,9 @@ class DiffBrushRunner:
         candidate_styled = styled
         should_try_trim = prompt_text != text or (not verification["passed"] and verification["prefix_matches_expected"])
         if should_try_trim:
-            word_boxes = ocr_word_boxes(Path(styled["path"]), psm=7)
+            word_boxes = ocr if "words" in ocr else ocr_word_boxes(Path(styled["path"]), psm=7, allow_missing=True)
             trimmed = _trim_verified_prefix(
-                expected_token_count=len(verify_ocr_text(text, text)["expected_tokens"]),
+                expected_token_count=len(text.split()),
                 styled=styled,
                 word_boxes=word_boxes,
                 out_dir=out_dir,
@@ -228,21 +234,25 @@ class DiffBrushRunner:
             if trimmed is not None:
                 trimmed_ocr = ocr_image(Path(trimmed["styled_crop"]["path"]), psm=7)
                 trimmed_verification = verify_ocr_text(text, trimmed_ocr["text"])
+                trimmed_profile = rgba_ink_profile(Path(trimmed["styled_crop"]["path"]))
+                trimmed_reasons = _quality_reject_reasons(text, trimmed["styled_crop"], trimmed_profile)
                 trim_evidence = {
                     "word_boxes": word_boxes,
                     "trimmed_crop": trimmed["styled_crop"],
                     "trimmed_ocr": trimmed_ocr,
                     "trimmed_verification": trimmed_verification,
                 }
-                if trimmed_verification["passed"]:
+                if not trimmed_reasons and (prompt_text != text or trimmed_verification["match_score"] > verification["match_score"]):
                     verification = trimmed_verification | {
-                        "accepted_after_suffix_trim": True,
+                        "accepted_after_suffix_trim": trimmed_verification["passed"],
                         "trimmed_suffix_tokens": verify_ocr_text(text, ocr["text"])["trimmable_suffix_tokens"],
                         "prompt_verification_before_trim": prompt_verification,
                     }
                     ocr = trimmed_ocr
                     candidate_styled = trimmed["styled_crop"]
-        if prompt_text != text and candidate_styled["path"] == styled["path"]:
+                    ink_profile = trimmed_profile
+                    quality_reject_reasons = trimmed_reasons
+        if prompt_text != text and not verification["passed"]:
             estimated_trim = _trim_estimated_prefix(
                 text=text,
                 prompt_text=prompt_text,
@@ -255,22 +265,27 @@ class DiffBrushRunner:
             estimated_verification = verify_ocr_text(text, estimated_ocr["text"])
             estimated_ink_profile = rgba_ink_profile(Path(estimated_trim["styled_crop"]["path"]))
             estimated_quality_reject_reasons = _quality_reject_reasons(text, estimated_trim["styled_crop"], estimated_ink_profile)
+            if not estimated_trim["clear_boundary"]:
+                estimated_quality_reject_reasons.append("prefix_cuts_through_ink")
             trim_evidence = (trim_evidence or {}) | {
                 "estimated_trimmed_crop": estimated_trim["styled_crop"],
                 "estimated_trimmed_ocr": estimated_ocr,
                 "estimated_trimmed_verification": estimated_verification,
                 "estimated_trimmed_ink_profile": estimated_ink_profile,
                 "estimated_trimmed_quality_reject_reasons": estimated_quality_reject_reasons,
-                "estimated_trim_reason": "Prompt padding must not be rendered; cropped by expected/prompt character ratio because OCR prefix trim did not certify a boundary.",
+                "estimated_trim_reason": "The crop was re-read after estimating the end of the requested words.",
             }
-            verification = estimated_verification | {
-                "estimated_padding_trim": True,
-                "prompt_verification_before_trim": prompt_verification,
-            }
-            ocr = estimated_ocr
-            candidate_styled = estimated_trim["styled_crop"]
-            ink_profile = estimated_ink_profile
-            quality_reject_reasons = estimated_quality_reject_reasons
+            if candidate_styled["path"] == styled["path"] or (
+                not estimated_quality_reject_reasons and estimated_verification["match_score"] > verification["match_score"]
+            ):
+                verification = estimated_verification | {
+                    "estimated_padding_trim": True,
+                    "prompt_verification_before_trim": prompt_verification,
+                }
+                ocr = estimated_ocr
+                candidate_styled = estimated_trim["styled_crop"]
+                ink_profile = estimated_ink_profile
+                quality_reject_reasons = estimated_quality_reject_reasons
         if not verification["passed"]:
             overwide_trim = _trim_overwide_suffix(
                 text=text,
@@ -290,13 +305,15 @@ class DiffBrushRunner:
                     "overwide_trimmed_verification": overwide_verification,
                     "overwide_trimmed_ink_profile": overwide_ink_profile,
                     "overwide_trimmed_quality_reject_reasons": overwide_quality_reject_reasons,
-                    "overwide_trim_reason": "Cropped a right-edge DiffBrush hallucination tail from an overwide carrier crop; no fallback text was inserted.",
+                    "overwide_trim_reason": "Tried a clear ink gap near the requested width and compared the two OCR readings.",
                 }
-                verification = overwide_verification | {"overwide_suffix_trim": True}
-                ocr = overwide_ocr
-                candidate_styled = overwide_trim["styled_crop"]
-                ink_profile = overwide_ink_profile
-                quality_reject_reasons = overwide_quality_reject_reasons
+                if overwide_verification["match_score"] > verification["match_score"] and not overwide_quality_reject_reasons:
+                    verification = overwide_verification | {"overwide_suffix_trim": True}
+                    ocr = overwide_ocr
+                    candidate_styled = overwide_trim["styled_crop"]
+                    ink_profile = overwide_ink_profile
+                    quality_reject_reasons = overwide_quality_reject_reasons
+        verification["recognizer"] = ocr.get("engine")
         accepted = verification["passed"] and not quality_reject_reasons
         selection_score = float(verification.get("match_score", 0.0) or 0.0)
         if quality_reject_reasons:
@@ -304,6 +321,7 @@ class DiffBrushRunner:
         return {
             "id": candidate_id,
             "prompt_text": prompt_text,
+            "style_reference": str(style_ref),
             "result_json": str(result_path),
             "sample": str(sample),
             "seed": result.get("seed", seed),
@@ -335,7 +353,7 @@ class DiffBrushRunner:
         final_path.parent.mkdir(parents=True, exist_ok=True)
         shutil.copyfile(candidate["styled_crop"]["path"], final_path)
         final_styled = dict(candidate["styled_crop"]) | {"path": str(final_path), "sha256": sha_file(final_path)}
-        final_word_boxes = ocr_word_boxes(final_path, psm=7)
+        final_word_boxes = ocr_word_boxes(final_path, psm=7, allow_missing=True)
         return {
             "id": span_id,
             "display_text": text,
@@ -349,9 +367,11 @@ class DiffBrushRunner:
             "seed": candidate["seed"],
             "steps": candidate["steps"],
             "device": candidate["device"],
+            "style_reference": candidate["style_reference"],
             "style_ocr_legibility": style_legibility,
             "styled_crop": final_styled,
             "ocr_verification": candidate["verification"],
+            "ocr_reading": candidate["ocr"],
             "ocr_word_boxes": final_word_boxes,
             "accepted_candidate": candidate["id"],
             "candidate_count": len(candidates),
@@ -407,19 +427,21 @@ class DiffBrushRunner:
     # ------------------------------------------------------------------
 
     def _ensure_inner(self, style_ref: Path):
+        if self._inner is not None:
+            return self._inner
         try:
             from .run_single import DiffBrushSingleRunner, find_style_dir, select_device
         except ModuleNotFoundError as error:
-            if error.name == "torch":
-                raise RuntimeError("DiffBrush in-process runner requires torch in the active Python environment.") from error
-            raise
+            raise DiffBrushUnavailable(f"DiffBrush requires {error.name}. Install the diffbrush extra.") from error
         style_dir = find_style_dir(style_ref)
-        if self._inner is not None and self._inner_style_dir == style_dir:
-            return self._inner
         self.validate()
         device = select_device(self.device_request)
         try:
             inner = DiffBrushSingleRunner(self.root, self.checkpoint, style_dir, device)
+        except ModuleNotFoundError as error:
+            raise DiffBrushUnavailable(f"DiffBrush requires {error.name}. Install the diffbrush extra.") from error
+        except DiffBrushUnavailable:
+            raise
         except Exception:
             if device.type != "mps":
                 raise
@@ -430,9 +452,20 @@ class DiffBrushRunner:
             device = torch.device("cpu")
             inner = DiffBrushSingleRunner(self.root, self.checkpoint, style_dir, device)
         self._inner = inner
-        self._inner_style_dir = style_dir
         self._device = device
         return inner
+
+    def _checkpoint_hash(self) -> str:
+        path = self.checkpoint.resolve()
+        stat = path.stat()
+        identity = (path, stat.st_size, stat.st_mtime_ns)
+        if self._weight_identity is None or self._weight_identity[:3] != identity:
+            with path.open("rb") as weights:
+                digest = hashlib.file_digest(weights, "sha256").hexdigest()
+            if self._weight_identity is not None and self._weight_identity[3] != digest:
+                self._inner = None
+            self._weight_identity = (*identity, digest)
+        return self._weight_identity[3]
 
     def _run(
         self,
@@ -445,39 +478,45 @@ class DiffBrushRunner:
         writer_id: str,
         conditioning_mode: str,
     ) -> Path:
-        run_dir = out_dir / "diffbrush_runs" / span_id
+        self.validate()
+        input_spec = {
+            "version": 2,
+            "prompt": prompt, "model_text": model_text(prompt), "writer_id": writer_id, "conditioning_mode": conditioning_mode,
+            "style_image": str(style_ref.resolve()), "style_sha256": sha_file(style_ref),
+            "checkpoint": str(self.checkpoint.resolve()), "checkpoint_sha256": self._checkpoint_hash(),
+            "repo_root": str(self.root.resolve()), "requested_device": self.device_request,
+            "seed": seed, "steps": self.steps, "eta": self.eta,
+            "canvas_width": canvas_width(model_text(prompt)),
+        }
+        cache_key = sha_text(json.dumps(input_spec, sort_keys=True))
+        run_dir = out_dir.resolve() / "diffbrush_runs" / f"{span_id}_{cache_key[:16]}"
         result_path = run_dir / "result.json"
-        if result_path.exists():
-            return result_path
+        sample_path = run_dir / "sample.png"
+        if result_path.is_file() and sample_path.is_file():
+            try:
+                cached = read_json(result_path)
+                if (cached["cache_key"] == cache_key and Path(cached["outputs"]["sample"]) == sample_path
+                        and cached["sample_sha256"] == sha_file(sample_path)):
+                    return result_path
+            except (OSError, ValueError, KeyError, TypeError):
+                pass
 
         run_dir.mkdir(parents=True, exist_ok=True)
         inner = self._ensure_inner(style_ref)
-        sample_path = run_dir / "sample.png"
         from .run_single import seed_everything
 
         seed_everything(seed)
-        inner.generate_one(
-            prompt,
-            style_ref,
-            sample_path,
-            sampling_timesteps=self.steps,
-            eta=self.eta,
-        )
-        result = {
-            "prompt": prompt,
-            "prompt_id": span_id,
-            "run_id": span_id,
-            "writer_id": writer_id,
-            "conditioning_mode": conditioning_mode,
-            "seed": seed,
-            "steps": self.steps,
-            "device": self._device.type,
-            "repo_root": str(self.root),
-            "checkpoint": str(self.checkpoint),
-            "style_image": str(style_ref),
-            "outputs": {"sample": str(sample_path)},
-        }
-        result_path.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+        with TemporaryDirectory(dir=run_dir) as work:
+            raw = Path(work) / "sample.png"
+            inner.generate_one(prompt, style_ref.resolve(), raw, sampling_timesteps=self.steps, eta=self.eta)
+            result = {
+                **input_spec, "prompt_id": span_id, "run_id": span_id, "device": self._device.type,
+                "cache_key": cache_key, "sample_sha256": sha_file(raw), "outputs": {"sample": str(sample_path)},
+            }
+            partial = Path(work) / "result.json"
+            partial.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            raw.replace(sample_path)
+            partial.replace(result_path)
         return result_path
 
     # ------------------------------------------------------------------
@@ -586,6 +625,16 @@ def _save_isolated_component(arr: Any, comp: dict[str, Any], crop_box: tuple[int
     Image.fromarray(crop_arr, mode="L").save(dst)
 
 
+def _ink_gaps(path: Path) -> list[tuple[int, int]]:
+    from ..ingest.style_lines import ink_gaps
+
+    Image, np = require_pillow_numpy()
+    with Image.open(path) as source:
+        alpha = np.asarray(source.getchannel("A"))
+    mask = alpha > max(10, int(alpha.max()) * 0.17)
+    return [(a, b) for a, b in ink_gaps(mask) if b - a >= 2]
+
+
 def _trim_verified_prefix(
     *,
     expected_token_count: int,
@@ -602,7 +651,12 @@ def _trim_verified_prefix(
     first_extra = words[expected_token_count]
     if first_extra["left"] <= last_expected["right"]:
         return None
-    trim_x = int((last_expected["right"] + first_extra["left"]) / 2)
+    left, right = last_expected["right"], first_extra["left"]
+    gaps = [(max(a, left), min(b, right)) for a, b in _ink_gaps(Path(styled["path"])) if b > left and a < right]
+    if not gaps:
+        return None
+    a, b = max(gaps, key=lambda gap: gap[1] - gap[0])
+    trim_x = (a + b) // 2
     trimmed_path = out_dir / "prose_candidates" / span_id / f"{candidate_id}_trimmed.png"
     trimmed = trim_rgba_right(Path(styled["path"]), trimmed_path, trim_x, pad=0)
     return {"styled_crop": dict(styled) | trimmed | {"trim_policy": "ocr_verified_prefix_suffix_trim"}}
@@ -619,11 +673,26 @@ def _trim_estimated_prefix(
 ) -> dict[str, Any]:
     width = int(styled["width"])
     ratio = len(text.rstrip()) / max(1, len(prompt_text.rstrip()))
-    right_x = max(1, min(width, int(width * ratio) + 6))
+    right_x = max(1, min(width, round(width * ratio)))
+    keep, count = len(text.split()), len(prompt_text.split())
+    gaps = _ink_gaps(Path(styled["path"]))
+    word_gaps = [gap for gap in gaps if gap[1] - gap[0] >= max(3, int(styled["height"]) * 0.09)]
+    if 0 < keep < count and len(word_gaps) >= count - 1:
+        widest = sorted(word_gaps, key=lambda gap: gap[1] - gap[0], reverse=True)[:count - 1]
+        left, right = sorted(widest)[keep - 1]
+        policy = "word_gap_prefix_trim"
+    elif gaps:
+        left, right = min(gaps, key=lambda gap: abs((gap[0] + gap[1]) / 2 - right_x))
+        policy = "estimated_padding_suffix_trim"
+    else:
+        left = right = right_x
+        policy = "estimated_padding_suffix_trim"
+    right_x = (left + right) // 2
     trimmed_path = out_dir / "prose_candidates" / span_id / f"{candidate_id}_estimated_prefix.png"
-    trimmed = trim_rgba_right(Path(styled["path"]), trimmed_path, right_x=right_x, pad=2)
+    trimmed = trim_rgba_right(Path(styled["path"]), trimmed_path, right_x=right_x, pad=0)
     return {
-        "styled_crop": dict(styled) | trimmed | {"trim_policy": "estimated_padding_suffix_trim"},
+        "styled_crop": dict(styled) | trimmed | {"trim_policy": policy},
+        "clear_boundary": left < right or right_x == width,
         "crop_right_x": right_x,
         "ratio": round(ratio, 4),
     }
@@ -644,8 +713,13 @@ def _trim_overwide_suffix(
     target_right = int(max(130, min(width, text_len * 30 + 24)))
     if width <= target_right * 1.22:
         return None
+    gaps = _ink_gaps(Path(styled["path"]))
+    if not gaps:
+        return None
+    left, right = min(gaps, key=lambda gap: abs((gap[0] + gap[1]) / 2 - target_right))
+    target_right = (left + right) // 2
     trimmed_path = out_dir / "prose_candidates" / span_id / f"{candidate_id}_overwide_trimmed.png"
-    trimmed = trim_rgba_right(Path(styled["path"]), trimmed_path, right_x=target_right, pad=2)
+    trimmed = trim_rgba_right(Path(styled["path"]), trimmed_path, right_x=target_right, pad=0)
     return {
         "styled_crop": dict(styled) | trimmed | {
             "trim_policy": "overwide_diffbrush_suffix_trim",
@@ -667,7 +741,7 @@ def _quality_reject_reasons(text: str, styled: dict[str, Any], ink_profile: dict
     mean_alpha = float(ink_profile.get("mean_alpha", 0.0) or 0.0)
     width = float(styled.get("width", 0.0) or 0.0)
     expected_len = max(1, len(text.strip()))
-    if density > 0.42:
+    if density > (0.78 if expected_len <= 2 else 0.42):
         reasons.append("excessive_ink_density")
     if mean_alpha <= 0.02:
         reasons.append("empty_or_nearly_transparent_ink")

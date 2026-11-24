@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 import re
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True)
@@ -20,6 +20,7 @@ class ParsedLine:
     index: int
     text: str
     spans: tuple[Span, ...]
+    ending: str = ""
 
 
 @dataclass(frozen=True)
@@ -35,19 +36,40 @@ class ProseToken:
     text: str
 
 
+def _math_end(markup: str, start: int) -> int:
+    # Consume closing brackets belonging to indices such as A[B[i]].
+    # Brackets in half-open intervals may have no matching square bracket.
+    depth = 0
+    fallback = -1
+    for match in re.compile(r"\[+|\]+").finditer(markup, start):
+        length = match.end() - match.start()
+        if markup[match.start()] == "[":
+            if length >= 2 and fallback >= 0:
+                break
+            depth += length
+        else:
+            if length >= depth + 2:
+                return match.start() + depth
+            if length >= 2:
+                fallback = match.end() - 2
+            depth = max(0, depth - length)
+    return fallback
+
+
 def parse_source(source_text: str) -> ParsePlan:
-    source_text = source_text.rstrip("\n")
     lines: list[ParsedLine] = []
     spans: list[Span] = []
     cursor = 0
-    for line_index, markup in enumerate(source_text.splitlines()):
+    for line_index, raw_line in enumerate(source_text.splitlines(keepends=True)):
+        markup = raw_line.splitlines()[0]
+        ending = raw_line[len(markup):]
         plain = ""
         parts: list[Span] = []
         pos = 0
         part_index = 0
         while pos < len(markup):
             if markup.startswith("[[", pos):
-                end = markup.find("]]", pos + 2)
+                end = _math_end(markup, pos + 2)
                 if end == -1:
                     raise ValueError(f"unclosed math delimiter on line {line_index + 1}")
                 text = markup[pos + 2 : end]
@@ -78,9 +100,9 @@ def parse_source(source_text: str) -> ParsePlan:
             parts.append(span)
             spans.append(span)
             part_index += 1
-        lines.append(ParsedLine(index=line_index, text=plain, spans=tuple(parts)))
-        cursor += len(plain) + 1
-    return ParsePlan(source_text="\n".join(line.text for line in lines), lines=tuple(lines), spans=tuple(spans))
+        lines.append(ParsedLine(index=line_index, text=plain, spans=tuple(parts), ending=ending))
+        cursor += len(plain) + len(ending)
+    return ParsePlan(source_text="".join(line.text + line.ending for line in lines), lines=tuple(lines), spans=tuple(spans))
 
 
 def _split_long_token(token: str, max_chars: int) -> list[str]:
@@ -150,11 +172,12 @@ def plan_to_dict(plan: ParsePlan) -> dict:
     return {
         "schema_version": "handgen_parse_plan_v1",
         "source_text": plan.source_text,
-        "delimiter_policy": "Text inside [[...]] routes to worksheet glyph-bank math; all other text routes to DiffBrush prose.",
+        "delimiter_policy": "Text inside [[...]] is math. Other text is prose.",
         "lines": [
             {
                 "index": line.index,
                 "text": line.text,
+                "ending": line.ending,
                 "spans": [
                     {
                         "id": span.id,

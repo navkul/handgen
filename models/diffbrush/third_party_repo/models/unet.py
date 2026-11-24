@@ -966,7 +966,7 @@ class UNetModel(nn.Module):
         )
     
     
-    def forward(self, x, timesteps=None, style=None, content=None, wid=None, tag='test', **kwargs):
+    def forward(self, x, timesteps=None, style=None, content=None, wid=None, tag='test', context=None, **kwargs):
         """
         Apply the model to an input batch.
         :param x: an [N x C x ...] Tensor of inputs.
@@ -982,7 +982,7 @@ class UNetModel(nn.Module):
 
         if tag=='train':
             context, vertical_proxy_loss, horizontal_proxy_loss = self.mix_net(style, content, wid)
-        else:
+        elif context is None:
             context = self.mix_net.generate(style, content)
         h = x.type(self.dtype)
         

@@ -5,9 +5,11 @@ from typing import Any
 
 from .. import db
 from ..diffbrush.runner import DiffBrushRunner
-from ..render.document import PLACEHOLDER_VOCABULARY, render_document
+from ..ingest.style import writer_style_lines
+from ..render.carriers import PLACEHOLDER_VOCABULARY
+from ..render.document import SEED, render_document
 from ..utils import read_json, require_pillow_numpy, sha_text, write_json
-
+from .pages import assess_pages
 
 DEFAULT_MIXED_LINES = [
     "Show that p + q is odd.",
@@ -88,14 +90,29 @@ def render_eval_suite(
     *,
     source_path: Path | None = None,
     max_lines: int = 10,
+    prose_mode: str = "auto",
+    adapter: Path | None = None,
+    seed: int = SEED,
+    carrier_layout: bool = False,
+    infer_math: bool = False,
+    require_verified: bool = False,
 ) -> dict[str, Any]:
     out_dir.mkdir(parents=True, exist_ok=True)
     source = source_path or _write_default_source(out_dir, max_lines=max_lines)
     render_out = out_dir / "render"
-    manifest = render_document(writer_id, source, render_out)
+    manifest = render_document(writer_id, source, render_out, infer_math=infer_math or source_path is None,
+                               carrier_layout=carrier_layout or source_path is None, prose_mode=prose_mode,
+                               adapter=adapter, seed=seed, require_verified=require_verified)
     metrics = summarize_manifest(manifest)
+    readback = assess_pages(manifest, out_dir / "page_readback")
+    metrics["page_readback"] = readback
+    gates = metrics["quality_gates"]
+    gates["all_placements_have_ink"] = not readback["empty_ink_spans"]
+    if readback["target_characters"]:
+        gates["page_prose_readback_exact"] = readback["character_edits"] == 0
+    gates["passed"] = all(value for name, value in gates.items() if name != "passed")
     metrics["source_path"] = str(source)
-    metrics["render_manifest"] = str(render_out / "manifest.json")
+    metrics["render_manifest"] = str(Path(manifest["outputs"]["svg"]).with_name("manifest.json"))
     metrics["contact_sheet"] = str(_write_contact_sheet(manifest, out_dir / "contact_sheet.png"))
     metrics_path = out_dir / "metrics.json"
     write_json(metrics_path, metrics)
@@ -115,11 +132,12 @@ def render_placeholder_benchmark(
     db.init_db()
     with db.connect() as con:
         db.require_writer(con, writer_id)
-        style = db.latest_style_ref(con, writer_id)
-    if style is None:
+        style_lines = writer_style_lines(con, writer_id)
+    if not style_lines:
         raise RuntimeError(f"writer {writer_id!r} has no style reference; run `handgen style add` first")
-    style_ref = Path(style["path"])
+    style_ref = style_lines[0]
     runner = DiffBrushRunner()
+    runner.style_refs = tuple(style_lines)
     results: list[dict[str, Any]] = []
     for placeholder in placeholders:
         for template_index, template in enumerate(templates):
@@ -191,11 +209,12 @@ def render_carrier_prompt_benchmark(
     db.init_db()
     with db.connect() as con:
         db.require_writer(con, writer_id)
-        style = db.latest_style_ref(con, writer_id)
-    if style is None:
+        style_lines = writer_style_lines(con, writer_id)
+    if not style_lines:
         raise RuntimeError(f"writer {writer_id!r} has no style reference; run `handgen style add` first")
-    style_ref = Path(style["path"])
+    style_ref = style_lines[0]
     runner = DiffBrushRunner()
+    runner.style_refs = tuple(style_lines)
     selected_contexts = contexts or tuple(CARRIER_PROMPT_BENCHMARKS)
     results: list[dict[str, Any]] = []
     for context in selected_contexts:
@@ -259,6 +278,19 @@ def render_carrier_prompt_benchmark(
 
 
 def summarize_manifest(manifest: dict[str, Any]) -> dict[str, Any]:
+    if manifest.get("schema_version") == "handgen_render_manifest_v2":
+        from collections import Counter
+        visible = [s for s in manifest["spans"] if s.get("artifact")]
+        evidence = Counter(s["exactness_evidence"]["method"] for s in visible)
+        gates = {"source_contract_passed": manifest["source_contract"]["passed"],
+                 "all_visible_spans_supported": all(s["exactness_evidence"]["method"] in
+                     {"ocr_match", "transcript_label", "worksheet_labels"} for s in visible)}
+        return {"schema_version": "handgen_eval_metrics_v2",
+                "source_contract": manifest["source_contract"],
+                "quality_gates": {**gates, "passed": all(gates.values())},
+                "evidence_counts": dict(evidence), "route_counts": dict(Counter(s["route"] for s in visible)),
+                "warning_codes": [w["code"] for w in manifest["warnings"]],
+                "outputs": manifest["outputs"]}
     carrier_spans = [span for span in manifest.get("spans", []) if span.get("type") in {"slot_carrier_prose", "prose"}]
     math_slots = [span for span in manifest.get("spans", []) if span.get("type") == "math_slot_replacement"]
     route_counts: dict[str, int] = {}
@@ -490,9 +522,8 @@ def _write_default_source(out_dir: Path, *, max_lines: int) -> Path:
 def _write_contact_sheet(manifest: dict[str, Any], path: Path) -> Path:
     Image, _ = require_pillow_numpy()
     image_paths: list[Path] = []
-    output_png = manifest.get("outputs", {}).get("png")
-    if output_png:
-        image_paths.append(Path(output_png))
+    pages = manifest.get("outputs", {}).get("pages") or [manifest.get("outputs", {})]
+    image_paths.extend(Path(page["png"]) for page in pages if page.get("png"))
     for span in manifest.get("spans", []):
         crop = span.get("diffbrush", {}).get("styled_crop", {}).get("path")
         if crop:

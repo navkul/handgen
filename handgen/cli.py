@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import argparse
+import os
 import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 from . import db
@@ -14,10 +16,11 @@ from .eval.harness import (
     render_eval_suite,
     render_placeholder_benchmark,
 )
+from .ingest.style import register_style
 from .ingest.worksheet import ingest_worksheet
 from .paths import DATA_DIR
-from .render.document import render_document
-from .utils import now_iso, png_size, sha_file, write_json
+from .render.document import SEED, render_document
+from .utils import now_iso, sha_file
 
 
 def cmd_init(_: argparse.Namespace) -> int:
@@ -38,21 +41,36 @@ def cmd_style_add(args: argparse.Namespace) -> int:
     source = Path(args.path).resolve()
     if not source.exists():
         raise RuntimeError(f"style reference not found: {source}")
+    transcript = Path(args.transcript).read_text(encoding="utf-8-sig") if args.transcript else None
+    crop = tuple(args.crop) if args.crop else None
     with db.connect() as con:
         db.require_writer(con, args.writer_id)
-    dst = canonical_asset(source, DATA_DIR / "style_refs" / args.writer_id)
-    width = height = None
-    if dst.suffix.lower() == ".png":
-        width, height = png_size(dst)
-    with db.connect() as con:
-        con.execute(
-            """
-            INSERT INTO style_refs(writer_id, path, sha256, width, height, created_at)
-            VALUES (?, ?, ?, ?, ?, ?)
-            """,
-            (args.writer_id, str(dst), sha_file(dst), width, height, now_iso()),
-        )
-    print(f"style reference registered: {dst}")
+        manifest_path, manifest = register_style(con, args.writer_id, source, DATA_DIR / "style_refs" / args.writer_id,
+                                                transcript, crop=crop)
+    print(f"Prepared {len(manifest['windows'])} reference windows from {len(manifest['lines'])} handwritten lines.")
+    if manifest["transcript"] is not None:
+        print(f"Learned {len(manifest['words'])} word exemplars from the supplied transcript.")
+        for line in manifest["lines"]:
+            if line["alignment"] != "user transcript aligned to isolated word ink":
+                print(f"Skipped words on line {line['line_index'] + 1}. {line['alignment']}.")
+    print(manifest_path)
+    return 0
+
+
+def cmd_style_fit(args: argparse.Namespace) -> int:
+    from .vatr.fit import fit_writer
+
+    test_reference = tuple(map(Path, args.test_reference)) if args.test_reference else None
+    result = fit_writer(args.writer_id, Path(args.out).resolve(), steps=args.steps, seed=args.seed,
+                        test_reference=test_reference)
+    print(f"Selected step {result['selected_step']} with validation loss {result['selected_loss']:.4f} "
+          f"(initial {result['baseline_loss']:.4f}).")
+    print(result["adapter"])
+    print(result["comparison"])
+    if "independent_test" in result:
+        test = result["independent_test"]
+        print(f"Separate reference, {len(test['words'])} word samples: "
+              f"{test['baseline_loss']:.4f} before fitting, {test['selected_loss']:.4f} after.")
     return 0
 
 
@@ -65,19 +83,15 @@ def cmd_worksheet_ingest(args: argparse.Namespace) -> int:
         db.require_writer(con, args.writer_id)
     source = canonical_asset(source, DATA_DIR / "worksheets" / args.writer_id)
     out_dir = source.with_suffix("")
-    manifest = ingest_worksheet(args.writer_id, source, out_dir, dpi=args.dpi)
-    manifest_path = out_dir / "manifest.json"
+    layout = Path(args.layout) if args.layout else None
+    manifest = ingest_worksheet(args.writer_id, source, out_dir, dpi=args.dpi, layout=layout)
+    manifest_path = out_dir / manifest["snapshot_name"]
     with db.connect() as con:
-        prior_ids = [
-            row[0]
-            for row in con.execute(
-                "SELECT id FROM worksheets WHERE writer_id = ?", (args.writer_id,)
-            ).fetchall()
-        ]
-        if prior_ids:
-            placeholders = ",".join("?" for _ in prior_ids)
-            con.execute(f"DELETE FROM glyphs WHERE worksheet_id IN ({placeholders})", prior_ids)
-            con.execute(f"DELETE FROM worksheets WHERE id IN ({placeholders})", prior_ids)
+        con.execute(
+            "DELETE FROM glyphs WHERE worksheet_id IN (SELECT id FROM worksheets WHERE writer_id = ?)",
+            (args.writer_id,),
+        )
+        con.execute("DELETE FROM worksheets WHERE writer_id = ?", (args.writer_id,))
         con.execute(
             "INSERT INTO worksheets(writer_id, source_path, manifest_path, created_at) VALUES (?, ?, ?, ?)",
             (args.writer_id, str(source), str(manifest_path), now_iso()),
@@ -102,14 +116,25 @@ def canonical_asset(source: Path, canonical_dir: Path) -> Path:
     canonical_dir = canonical_dir.resolve()
     source = source.resolve()
     canonical_dir.mkdir(parents=True, exist_ok=True)
-    try:
-        source.relative_to(canonical_dir)
+    if source.is_relative_to(canonical_dir):
         return source
-    except ValueError:
-        dst = canonical_dir / source.name
-        if source != dst:
-            shutil.copyfile(source, dst)
-        return dst
+    # Keep the first scan's name and bytes. A second upload with the same
+    # basename gets its own source path, including when two imports race.
+    with tempfile.NamedTemporaryFile(dir=canonical_dir) as copied:
+        with source.open("rb") as incoming:
+            shutil.copyfileobj(incoming, copied)
+        copied.flush()
+        digest = sha_file(Path(copied.name))
+        for name in (source.name, f"{source.stem}-{digest}{source.suffix}"):
+            dest = canonical_dir / name
+            try:
+                os.link(copied.name, dest)
+            except FileExistsError:
+                if dest.is_file() and sha_file(dest) == digest:
+                    return dest
+            else:
+                return dest
+    raise RuntimeError(f"Cannot store distinct worksheet assets under {canonical_dir}")
 
 
 def cmd_document_render(args: argparse.Namespace) -> int:
@@ -117,7 +142,10 @@ def cmd_document_render(args: argparse.Namespace) -> int:
     if not source.exists():
         raise RuntimeError(f"source text not found: {source}")
     out_dir = Path(args.out).resolve()
-    manifest = render_document(args.writer_id, source, out_dir, max_words=args.max_words, max_chars=args.max_chars)
+    manifest = render_document(args.writer_id, source, out_dir, max_words=args.max_words, max_chars=args.max_chars,
+                               prose_mode=args.prose, infer_math=args.infer_math, carrier_layout=args.carriers,
+                               require_verified=args.require_verified, seed=args.seed,
+                               adapter=Path(args.adapter).resolve() if args.adapter else None)
     print(write_summary(manifest))
     return 0
 
@@ -131,11 +159,14 @@ def cmd_eval_render(args: argparse.Namespace) -> int:
         Path(args.out).resolve(),
         source_path=source,
         max_lines=args.max_lines,
+        prose_mode=args.prose,
+        adapter=Path(args.adapter).resolve() if args.adapter else None,
+        seed=args.seed, infer_math=args.infer_math, carrier_layout=args.carriers, require_verified=args.require_verified,
     )
     print(f"metrics: {metrics['metrics_path']}")
     print(f"contact_sheet: {metrics['contact_sheet']}")
     print(f"png: {metrics['outputs'].get('png')}")
-    print(f"carrier_mean_ocr_score: {metrics.get('carrier_mean_ocr_score')}")
+    print(f"page_prose_character_error_rate: {metrics['page_readback']['character_error_rate']}")
     print(f"quality_gates: {metrics.get('quality_gates')}")
     print(f"warnings: {metrics.get('warning_codes')}")
     return 0
@@ -181,10 +212,11 @@ def cmd_eval_carrier_prompts(args: argparse.Namespace) -> int:
 
 def write_summary(manifest: dict) -> str:
     summary = {
+        "pages": len(manifest["outputs"]["pages"]),
         "svg": manifest["outputs"]["svg"],
         "png": manifest["outputs"]["png"],
         "manifest": str(Path(manifest["outputs"]["svg"]).with_name("manifest.json")),
-        "warnings": manifest.get("warnings", []),
+        "warnings": f"{len(manifest.get('warnings', []))} (details in warnings.json)",
     }
     return "\n".join([f"{key}: {value}" for key, value in summary.items()])
 
@@ -206,8 +238,19 @@ def build_parser() -> argparse.ArgumentParser:
     style_sub = style.add_subparsers(dest="style_cmd", required=True)
     style_add = style_sub.add_parser("add")
     style_add.add_argument("writer_id")
-    style_add.add_argument("path")
+    style_add.add_argument("path", help="Natural handwritten line or single-column page image.")
+    style_add.add_argument("--transcript", help="UTF-8 text file with one line per handwritten line. Learn word shapes at clear spaces.")
+    style_add.add_argument("--crop", type=int, nargs=4, metavar=("LEFT", "TOP", "RIGHT", "BOTTOM"),
+                           help="Use a rectangular handwriting region in EXIF-oriented source pixels.")
     style_add.set_defaults(func=cmd_style_add)
+    style_fit = style_sub.add_parser("fit", help="Fit VATr++ style conditioning on transcribed reference words.")
+    style_fit.add_argument("writer_id")
+    style_fit.add_argument("--out", required=True)
+    style_fit.add_argument("--steps", type=int, default=100)
+    style_fit.add_argument("--seed", type=int, default=732)
+    style_fit.add_argument("--test-reference", nargs=2, metavar=("IMAGE", "TRANSCRIPT"),
+                           help="Measure the selected model on unseen words from a separate handwriting image.")
+    style_fit.set_defaults(func=cmd_style_fit)
 
     worksheet = sub.add_parser("worksheet")
     worksheet_sub = worksheet.add_subparsers(dest="worksheet_cmd", required=True)
@@ -215,6 +258,7 @@ def build_parser() -> argparse.ArgumentParser:
     worksheet_ingest.add_argument("writer_id")
     worksheet_ingest.add_argument("path")
     worksheet_ingest.add_argument("--dpi", type=int, default=220)
+    worksheet_ingest.add_argument("--layout", help="JSON file with ordered worksheet sections and their handwritten labels")
     worksheet_ingest.set_defaults(func=cmd_worksheet_ingest)
 
     document = sub.add_parser("document")
@@ -223,16 +267,26 @@ def build_parser() -> argparse.ArgumentParser:
     doc_render.add_argument("writer_id")
     doc_render.add_argument("source")
     doc_render.add_argument("--out", required=True)
+    doc_render.add_argument("--prose", choices=("auto", "samples", "diffbrush", "vatr"), default="auto",
+                            help="Use reference words and sample repairs (auto), sample composition, DiffBrush, or VATr++.")
+    doc_render.add_argument("--infer-math", action="store_true",
+                            help="Also infer simple variable expressions in unmarked lines.")
+    doc_render.add_argument("--carriers", action="store_true",
+                            help="Try verified DiffBrush slot carriers on short mixed lines.")
+    doc_render.add_argument("--require-verified", action="store_true",
+                            help="Require sample-backed or OCR-matched ink for every visible span.")
+    doc_render.add_argument("--seed", type=int, default=SEED)
+    doc_render.add_argument("--adapter", help="VATr++ writer.safetensors produced by style fit.")
     doc_render.add_argument(
         "--max-words",
         type=int,
         default=6,
-        help="No-op for the default prose pipeline (balanced_dp). Retained for backward compatibility.",
+        help="Maximum words per greedy chunk when --max-chars is supplied.",
     )
     doc_render.add_argument(
         "--max-chars",
         type=int,
-        help="Optional escape hatch: when set, switch the prose pipeline to the legacy char-greedy chunker instead of balanced_dp.",
+        help="Use the greedy splitter with this character limit.",
     )
     doc_render.set_defaults(func=cmd_document_render)
 
@@ -243,6 +297,12 @@ def build_parser() -> argparse.ArgumentParser:
     eval_render.add_argument("--out", required=True)
     eval_render.add_argument("--source")
     eval_render.add_argument("--max-lines", type=int, default=10)
+    eval_render.add_argument("--prose", choices=("auto", "samples", "diffbrush", "vatr"), default="auto")
+    eval_render.add_argument("--adapter")
+    eval_render.add_argument("--seed", type=int, default=SEED)
+    eval_render.add_argument("--carriers", action="store_true")
+    eval_render.add_argument("--infer-math", action="store_true")
+    eval_render.add_argument("--require-verified", action="store_true")
     eval_render.set_defaults(func=cmd_eval_render)
     eval_placeholders = eval_sub.add_parser("placeholders")
     eval_placeholders.add_argument("writer_id")

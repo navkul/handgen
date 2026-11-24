@@ -1,111 +1,37 @@
 # Decisions
 
-This document records durable technical and product decisions. It is intentionally not a changelog. Add or update entries only when a commit changes a meaningful decision, reverses a decision, or adds a tradeoff future contributors need to understand.
+## Run experiments through a local CLI
 
-## Decision Format
+The same local command can enroll handwriting, render a note and measure the resulting page. Keeping references, fitted weights and evaluation artifacts on one machine lets a researcher inspect the ink alongside each recorded decision.
 
-Use this shape for new entries:
+## Store metadata in SQLite and ink on disk
 
-```md
-## YYYY-MM-DD: Short Decision Title
+SQLite links writer assets, the active worksheet, documents, job state and output digests. Source images, prepared crops, manifests, adapters and pages remain individually inspectable files. Content-based names protect different scans, annotations and worksheet layouts from collisions. Per-run output directories allow repeated renders and distinguish artifacts from different seeds or models.
 
-Decision: State the current decision in one or two sentences.
+## Publish SVG pages with two source records
 
-Reason: Explain why this choice fits the MVP.
+SVG is canonical because it retains individual placements with embedded assets. PNGs are derivatives rendered by librsvg. Preserve the original UTF-8 bytes, including markup and line endings, alongside the delimiter-free text and a SHA-256 for each. Reconstruct the latter from ordered source ranges before publishing. Pagination changes page geometry while preserving this contract.
 
-Tradeoff: Name the cost, risk, or thing deferred.
+## Choose the source of each piece of handwriting
 
-Update rule: Explain what kind of future commit should revisit this entry.
-```
+A labeled word sample preserves the writer’s letter shapes, joins and stroke widths. DiffBrush supplies context-sensitive prose, and VATr++ supplies individual novel words. Worksheet ink is the source of truth for inline variables, digits, Greek and operators. A direct sample has priority over a construction from existing marks. Digit isolation from DiffBrush is an explicitly unverified fallback for incomplete legacy worksheets and is disallowed by strict and samples-only rendering.
 
-If a later commit changes a decision, edit the existing entry so it reflects the current state. Add a short "Updated" note only when the reason for the reversal matters.
+Use balanced prose chunking by default and preserve an explicit character-limit override for comparisons. Slot carriers are opt-in. They require detectable cuts and independently readable prose on the carrier line. Direct composition preserves math at its natural width when those observations are unavailable.
 
-## 2026-05-14: Keep The MVP Local-First
+## Preserve distinctions in the evidence
 
-Decision: Handgen remains a local-first Python CLI until the rendering pipeline is reliable.
+A source hash proves which text was supplied. A worksheet label or transcribed word establishes which sample the renderer placed. OCR agreement provides reader evidence about the pixels. Keep all three available in manifests. Source preservation is mandatory. Strict mode additionally requires every visible placement to have a label or a matching OCR read. Ordinary rendering may retain a generated approximation and must record the intended and observed text.
 
-Reason: The current risk is generation correctness, source preservation, worksheet ingestion, and inspectable artifacts. Product infrastructure would add complexity before the core output is trustworthy.
+Measure exported pages separately. Region OCR may make different errors from crop recognition, and an OCR reader can agree with an incorrect shape. Expose actual observations, character counts and ink bounds so someone can inspect disagreements.
 
-Tradeoff: Each writer uses a local catalog and filesystem.
+## Calibrate a writer only when the available evidence supports it
 
-Update rule: Revisit this entry when a commit introduces any frontend, backend service, hosted runtime, or multi-user product boundary.
+Estimate natural word and space advance from transcript-aligned ink. Apply a personalized width correction only when held-out word families improve on a simple writer-specific baseline. Keep the base VATr++ generator frozen and fit a small conditioning offset from labeled words. Group case variants across splits, include the original conditioning in selection, and save the metric history. An optional independent reference measures new words only after selection. Use the fitted memory explicitly so a writer can compare it with the base generator.
 
-## 2026-05-14: Store Metadata In SQLite And Large Artifacts On Disk
+## Load neural models on demand
 
-Decision: SQLite stores writer, worksheet, glyph, document, job, and artifact metadata. Images, SVGs, PNGs, logs, model outputs, and manifests live on disk.
+The sample-only path works on CPU without neural weights. A neural render loads a model once and reuses its conditioning where the inputs are constant. Models, decoder assets and optional recognition weights can be staged locally. Git stores the inference integration, published weight references, checksums and example inputs. Generated jobs and model binaries are excluded.
 
-Reason: The MVP needs local inspectability and simple reproducibility without hiding generated artifacts inside the database.
+## Maintain current documentation
 
-Tradeoff: Filesystem paths are part of the working contract, so moving assets requires care.
-
-Update rule: Revisit this entry if artifact storage changes, paths become virtualized, or the database starts storing large binary blobs.
-
-## 2026-05-14: Use SVG As The Canonical Document Output
-
-Decision: The final composed document is written as SVG first, then rendered to PNG as a derivative.
-
-Reason: SVG keeps layout and embedded assets inspectable, which is important while the renderer is still evolving.
-
-Tradeoff: PNG appearance depends on the SVG renderer, currently `rsvg-convert`.
-
-Update rule: Revisit this entry if PDF or PNG becomes the canonical output or if SVG no longer contains enough diagnostic information.
-
-## 2026-05-14: Preserve Source Text In Manifests And Contracts
-
-Decision: Render manifests must preserve parsed source text, source hashes, span routing, and enough token metadata for source reconstruction.
-
-Reason: Visual handwriting generation can be approximate, but the machine-readable source sidecar must remain exact for debugging and evaluation.
-
-Tradeoff: Render code and manifests carry more metadata than a pure image-generation pipeline would need.
-
-Update rule: Revisit this entry when parser output, manifest schema, source-contract behavior, or OCR gating changes.
-
-## 2026-05-14: Split Prose Generation From Math Symbol Rendering
-
-Decision: Prose routes through source-locked DiffBrush generation. Inline ASCII variables, Greek, operators, relation symbols, and punctuation route through worksheet glyph-bank composition where possible. Digits still use isolated DiffBrush components for the current MVP iteration.
-
-Reason: DiffBrush is useful for natural handwriting, but raw generated math is not trusted as exact source-preserving notation.
-
-Tradeoff: Mixed rendering requires ink normalization, sizing rules, and route-specific verification. Digit rendering is still less exact than worksheet glyph rendering and remains a known limit.
-
-Update rule: Revisit this entry when digit, Greek, operator, punctuation, or variable routing changes.
-
-## 2026-05-13: Run DiffBrush In-Process And Reuse Models Across Spans
-
-Decision: `handgen/diffbrush/runner.py` builds the DiffBrush model in-process on the first call inside a `document render` and reuses it for every prose chunk and variable in that render. No subprocess per chunk, no persistent daemon.
-
-Reason: The earlier subprocess-per-chunk path paid a ~10s model-load cost on every call. On a 3-chunk test, switching to in-process reuse brings the total from ~37s to ~10s (~3.75×) with warm chunks at ~2s. The pattern matches how the Autoscribe benchmark drives DiffBrush.
-
-Tradeoff: The host Python process now holds the model in memory (CPU or MPS) for the duration of a render, so it should not also import other large models concurrently. Speedup only applies within a single `document render` call — repeated CLI invocations still pay one model-load each.
-
-Update rule: Revisit this entry if rendering moves to a long-running server, batches multiple documents in one process, or if DiffBrush is replaced by a different prose model.
-
-## 2026-05-14: Default Prose Chunking Is balanced_dp
-
-Decision: Every `handgen document render` of prose-only content uses the `balanced_dp` strategy from `handgen/chunking.py` by default. The legacy greedy `chunk_prose` chunker remains reachable only when `--max-chars` is explicitly passed, as an escape hatch.
-
-Reason: In a 5-sentence × 4-strategy benchmark on writer_002 (`outputs/chunking_compare/latest/`), `balanced_dp` eliminated OCR-detected word repeats and lifted average match score by ~33% versus the greedy baseline, mostly by avoiding the small orphan tail chunks (7–18 chars) that the greedy splitter emits at sentence ends. The result aligns with the IAM-line-shape finding in `docs/findings.md`: DiffBrush is most reliable when prompts cluster around ~42 characters.
-
-Tradeoff: `balanced_dp` is O(n²) in words rather than greedy O(n). At absolute scale that's ~27 µs vs ~13 µs per sentence — rounding error against the seconds-per-chunk diffusion sampling cost, so the change is effectively free. The `--max-words` CLI flag becomes a no-op for prose; documents that relied on it implicitly will now render with balanced_dp instead, which is the intended behavior change.
-
-Update rule: Revisit this entry when a new chunking strategy outperforms `balanced_dp` in the chunk_compare harness, or when the prose path is restructured to share `_chunk_carrier`'s slot-aware splitter.
-
-## 2026-05-14: Production DiffBrush Will Run As A Persistent GPU Service
-
-Decision: When Handgen moves off the local CLI, DiffBrush will run as a long-lived GPU server that keeps the model loaded in memory and accepts text + style-reference requests from the web app/backend. The MVP's in-process-per-render pattern will not be carried into production.
-
-Reason: Diffusion sampling dominates runtime (dozens of denoising UNet passes per chunk; see `docs/findings.md`). Reloading the model per request would pay the model-load cost on every job, and per-job VMs on cloud GPUs are wasteful when one warm process can serve many renders. A persistent service also enables candidate batching on CUDA (currently sequential — see the runner), which is a roughly 4× additional speedup on top of the GPU-versus-MPS gain.
-
-Tradeoff: A persistent GPU process is more operational complexity than the current CLI — health checks, GPU memory accounting, request queueing, and warm-pool management. It also pins one model version per process; rolling out a new DiffBrush checkpoint becomes a deploy event rather than a file swap.
-
-Update rule: Revisit this entry when work begins on a deployed runtime, or when a serverless / on-demand GPU approach is shown to match persistent-server latency for our workload.
-
-## 2026-05-14: Do Not Maintain A Changelog Yet
-
-Decision: The repo does not need a changelog while it is a local MVP staging repo without versioned releases or external users.
-
-Reason: Git history, `docs/findings.md`, and this decision log are better suited to current development.
-
-Tradeoff: There is no release-oriented narrative for non-developer users yet.
-
-Update rule: Add `CHANGELOG.md` when the project has versioned releases, external consumers, or a standalone package boundary.
+Update the architecture, pipeline, findings and relevant decisions when behavior or evidence changes. Keep a release changelog for the future standalone, versioned product.

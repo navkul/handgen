@@ -1,0 +1,5 @@
+Let [[n]] be any integer.
+Divide [[2n + 1]] by two.
+The quotient is [[n]] with remainder one.
+A remainder of one means it is odd.
+Thus [[2n + 1]] is always odd.

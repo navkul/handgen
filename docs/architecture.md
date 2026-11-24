@@ -1,78 +1,37 @@
 # Architecture
 
-This document describes the current Handgen MVP architecture. Keep it aligned with the codebase whenever a commit changes system boundaries, persistence, rendering routes, model integration, or artifact contracts.
+Handgen is a local Python CLI for generating ordinary handwritten notes, letters, study material and math proofs. A writer supplies natural prose and, for math, a labeled worksheet. Model weights, references, SQLite records and generated pages live on the local machine.
 
-## Product Boundary
+## Components
 
-Handgen is currently a local-first Python CLI for proving the core handwriting rendering pipeline before any deployed product work.
+| Component | Responsibility |
+| --- | --- |
+| `handgen/cli.py`, `db.py`, `paths.py` | Writer enrollment, asset registration, job state and artifact digests. |
+| `handgen/ingest/paper.py`, `style_lines.py`, `style.py` | Flatten paper illumination, remove rules, separate lines, produce model windows, and align optional transcripts to observed word gaps. |
+| `handgen/ingest/style_metrics.py` | Estimate space width and word advances in units of the writer’s letter-body height. Enable character-class width correction only when it improves held-out error. |
+| `handgen/ingest/worksheet.py` | Deskew a page, identify rows and groups of marks, assign ordered labels, and publish a hash-checked glyph bank. |
+| `handgen/parser.py`, `chunking.py`, `render/content.py` | Preserve line endings, map source spans to character offsets, and plan short prompts and formula runs. |
+| `handgen/diffbrush/` | Load the vendored line generator and VAE on demand. Draw candidates from multiple prepared references, normalize the ink and rank blind OCR reads. |
+| `handgen/vatr/` | Run the VATr++ word generator with local weights. Fit a writer-specific conditioning vector on labeled samples and evaluate it on separate word types. |
+| `handgen/render/assets.py`, `repair.py`, `carriers.py`, `math.py` | Choose a rendering route, extract readable generated substrings, reuse actual word images, and compose worksheet glyphs into prose or notation. |
+| `handgen/render/document.py`, `layout.py`, `ink.py` | Preflight coverage, align ink on a common baseline, wrap and paginate, publish the outputs, and register their hashes. |
+| `handgen/eval/` | Reconstruct source text from placements, run local OCR, and measure text and ink on the rasterized pages. |
 
-The system must not be optimized for signatures, checks, IDs, contracts, legal documents, financial documents, or deceptive identity-use cases.
+## Data and reproducibility
 
-## Core Components
+`HANDGEN_DATA_DIR` can override the default `data/` catalog. SQLite stores writers, raw style reference metadata, prepared style manifest pointers, the current worksheet and glyphs per writer, documents, render jobs, and output hashes. Large files live on disk.
 
-- `handgen/cli.py` exposes the local CLI commands and connects the database, filesystem assets, worksheet ingestion, and document rendering.
-- `handgen/db.py` owns the SQLite schema and metadata helpers.
-- `handgen/parser.py` parses source text and `[[...]]` math spans into a render plan that preserves source text.
-- `handgen/chunking.py` provides prose chunking strategies (`current`, `balanced_dp`, `punctuation_first`, `variable_length_sampling`). `balanced_dp` is the production default used by `handgen document render` for prose-only renders; the others remain reachable through the chunk_compare harness for A/B benchmarking.
-- `handgen/ingest/worksheet.py` rasterizes worksheet inputs and extracts labeled glyph-bank crops.
-- `handgen/diffbrush/runner.py` loads the DiffBrush model in-process and reuses it across every prose chunk and variable in a render, plus candidate generation, OCR reranking, and isolated component extraction.
-- `handgen/render/document.py` orchestrates document rendering, source-preservation checks, SVG composition, PNG export, and output manifests.
-- `handgen/render/math.py` composes math spans from worksheet glyphs and selected DiffBrush components.
-- `handgen/render/ink.py` normalizes ink alpha, crop trimming, and handwritten asset appearance.
-- `handgen/eval/ocr.py` and `handgen/eval/source_contract.py` provide lightweight verification around generated text and manifest source reconstruction.
+- `style_refs/<writer>/` holds original inputs and the `prepared/` packs. Each pack is keyed by image digest, preparation version, optional crop and transcript. Crop records include source coordinates and hashes. Older single-line registrations can still resolve their original image.
+- `worksheets/<writer>/<stem>/` holds the processed page, row images, glyph bank and manifests. Each registered recipe has a snapshot manifest with paths relative to its directory. The loader also understands earlier manifests written with absolute paths.
+- `<render-output>/runs/<job>-<unique>/` holds a complete render. Each SVG embeds the pixels it uses. The output directory also has convenience copies of the first page and the latest successful manifest. The manifest names all pages in its run.
+- Writer adapters live in the requested fit directory. Their metadata binds the saved conditioning memory to a writer ID and the SHA-256 of the base VATr++ checkpoint.
 
-## Persistence Model
+## Rendering and evidence
 
-SQLite stores metadata only. Large and inspectable artifacts stay on disk.
+Text inside `[[...]]` always enters the math compositor. Outside those delimiters, the default renderer can use transcribed word crops, OCR-checked DiffBrush lines, newly recognized subregions, worksheet lettering or optional VATr++ words. Math uses the writer’s labeled digits, variables, Greek, operators and punctuation. The compositor records which sampled strokes it used for derived operators and superscript or subscript digits. A legacy fallback can isolate a model-generated digit when its worksheet crop is missing and relaxed rendering is permitted.
 
-- Database: `data/handgen.sqlite3`
-- Style references: `data/style_refs/<writer_id>/`
-- Worksheets and glyph banks: `data/worksheets/<writer_id>/`
-- Render outputs: `outputs/<job_name>/`
+Each run stores both the original source bytes and the plain text with markup removed. Piece IDs, character ranges, original line endings, labels, and generation targets permit reconstruction. OCR agreement, a user’s sample label, and unverified generated ink have distinct evidence fields. The evaluation harness additionally measures what an OCR engine sees in the exported PNG, where layout and resampling can change legibility.
 
-Generated manifests are part of the debugging and evaluation surface. They should preserve source text, source hashes, render routes, selected artifacts, warnings, and source-contract results.
+## Runtime
 
-## Rendering Model
-
-SVG is the canonical document output because it keeps layout, embedded images, and composition metadata inspectable. PNG is a derivative rendered from SVG with `rsvg-convert`.
-
-The current rendering split is:
-
-- Prose outside `[[...]]` routes through source-locked DiffBrush generation.
-- Math spans inside `[[...]]` route through math-aware rendering.
-- Inline ASCII variables route through worksheet glyph-bank composition.
-- Greek, relation symbols, operators, and punctuation route through worksheet glyph-bank composition.
-- Digits currently use isolated DiffBrush connected components and are called out as a known MVP limit.
-- Raw DiffBrush math should not be treated as reliable source-preserving math output.
-
-## External Dependencies
-
-DiffBrush is vendored into this repo by default:
-
-- `models/diffbrush/third_party_repo/`
-- `models/diffbrush/third_party_repo/model_zoo/DiffBrush-ckpt.pt`
-- `handgen/diffbrush/run_single.py`
-
-Runtime overrides are supported with:
-
-- `DIFFBRUSH_ROOT`
-- `DIFFBRUSH_CHECKPOINT`
-- `DIFFBRUSH_DEVICE` (default `auto`; falls back from `mps` to `cpu` on failure)
-- `DIFFBRUSH_STEPS` (default `20` DDIM sampling steps)
-- `HANDGEN_DIFFBRUSH_PROSE_CANDIDATES` (default `4`; more candidates improve selection opportunities but increase render time)
-
-DiffBrush is invoked in-process. The model is built once on the first generate call in a render and held in memory for the rest of that render, so each subsequent chunk avoids the model-load cost. This replaces the earlier subprocess-per-chunk approach and is roughly 3.75× faster end-to-end on a 3-chunk test.
-
-DiffBrush is a diffusion model: each generation is dozens of UNet denoising passes that gradually turn random noise into a coherent handwritten line. Per-chunk cost is therefore dominated by diffusion sampling, which is heavily device-dependent — M-series MPS is 3–20× slower than cloud CUDA GPUs for this workload. Production will move DiffBrush behind a persistent GPU service (see `docs/decisions.md`).
-
-Image processing depends on Pillow and NumPy. PNG export depends on `rsvg-convert` being available at runtime.
-
-## Safety and Scope Constraints
-
-Do not add deployed-product infrastructure until the local CLI pipeline is reliable. Do not commit model weights, generated output directories, local SQLite databases, virtual environments, or unrelated research workspace changes. Reusable writer assets and worksheet-derived crops may be committed only when they are safe to share.
-
-## Documentation Update Example
-
-If a commit adds a web API, this file must change because the product boundary and component model changed. Add the service to Core Components, update Product Boundary, and describe any new persistence or runtime dependencies.
-
-If a commit only fixes spacing math in `handgen/render/math.py` without changing the route, artifact shape, or system boundary, this file probably does not need an edit. Update `docs/pipeline.md` or `docs/findings.md` only if the behavior or finding changed.
+The CPU-only samples route needs Pillow, NumPy and librsvg. PDF worksheet input adds Poppler. Optional generation uses local PyTorch on CUDA, Apple MPS or CPU and a local reader. Model instances and constant diffusion conditioning are reused during a render. The two model families can share the bundled Unifont archetypes. The model guide lists installation paths and checkpoint digests. The research credits identify each upstream component. [Model setup](../models/README.md) · [Research credits](references.md)

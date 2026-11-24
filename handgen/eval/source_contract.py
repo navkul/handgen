@@ -4,65 +4,66 @@ from typing import Any
 
 
 def verify_source_contract(manifest: dict[str, Any]) -> dict[str, Any]:
-    spans_by_id = {span["id"]: span for span in manifest.get("spans", [])}
+    """Reconstruct the plain source from placements. OCR is a separate check."""
+    spans = manifest.get("spans", [])
+    spans_by_id = {span["id"]: span for span in spans}
     errors: list[dict[str, Any]] = []
-    rendered_lines: list[str] = []
-
-    for line in manifest.get("lines", []):
+    if len(spans_by_id) != len(spans):
+        errors.append({"code": "duplicate_span_id"})
+    used: set[str] = set()
+    reconstructed: list[str] = []
+    cursor = 0
+    for i, line in enumerate(manifest.get("lines", [])):
         pieces: list[str] = []
         for span_id in line.get("span_ids", []):
             span = spans_by_id.get(span_id)
             if span is None:
-                errors.append({"code": "missing_span_record", "line_index": line.get("index"), "span_id": span_id})
+                errors.append({"code": "missing_span_record", "line_index": i, "span_id": span_id})
                 continue
-            pieces.append(span.get("text", ""))
-            if span.get("type") == "math":
-                math_text = _math_tokens_to_text(span.get("math", {}).get("tokens", []))
-                if math_text != span.get("text", ""):
-                    errors.append(
-                        {
-                            "code": "math_token_reconstruction_mismatch",
-                            "span_id": span_id,
-                            "expected": span.get("text", ""),
-                            "actual": math_text,
-                        }
-                    )
-        rendered_line = "".join(pieces)
-        rendered_lines.append(rendered_line)
-        if rendered_line != line.get("text", ""):
-            errors.append(
-                {
-                    "code": "line_reconstruction_mismatch",
-                    "line_index": line.get("index"),
-                    "expected": line.get("text", ""),
-                    "actual": rendered_line,
-                }
-            )
-
-    rendered_source = "\n".join(rendered_lines)
-    expected_source = manifest.get("source_text", "")
-    if rendered_source != expected_source:
-        errors.append({"code": "source_reconstruction_mismatch", "expected": expected_source, "actual": rendered_source})
-
+            if span_id in used:
+                errors.append({"code": "span_used_twice", "span_id": span_id})
+            used.add(span_id)
+            text = span["text"]
+            if "source_start" in span and (span["source_start"], span["source_end"]) != (cursor, cursor + len(text)):
+                errors.append({"code": "source_offset_mismatch", "span_id": span_id})
+            cursor += len(text)
+            pieces.append(text)
+            # Both worksheet words and math use the same token compositor.
+            block = span.get("math") or span.get("glyph_run")
+            if block is not None:
+                visible = "".join(t.get("source_character", t.get("text", "")) for t in block["tokens"])
+                if visible != text:
+                    errors.append({"code": "math_token_reconstruction_mismatch", "span_id": span_id,
+                                   "expected": text, "actual": visible})
+            exemplar = span.get("word_sample")
+            if exemplar is not None and exemplar["text"] != text:
+                errors.append({"code": "sample_label_mismatch", "span_id": span_id})
+            if "vatr" in span and span["vatr"]["target"] != text:
+                errors.append({"code": "generation_target_mismatch", "span_id": span_id})
+            if "recovered_crop" in span and span["recovered_crop"]["text"].split() != text.split():
+                errors.append({"code": "crop_target_mismatch", "span_id": span_id})
+            if "carrier_crop" in span and span["carrier_crop"].get("text", "").split() != text.split():
+                errors.append({"code": "carrier_crop_target_mismatch", "span_id": span_id})
+            run = span.get("diffbrush")
+            if run and "display_text" in run and not span.get("carrier_crop") and run["display_text"].split() != text.split():
+                errors.append({"code": "generation_target_mismatch", "span_id": span_id})
+        actual = "".join(pieces)
+        if actual != line["text"]:
+            errors.append({"code": "line_reconstruction_mismatch", "line_index": i, "expected": line["text"], "actual": actual})
+        ending = line.get("ending", "\n" if i + 1 < len(manifest["lines"]) else "")
+        reconstructed.extend((actual, ending))
+        cursor += len(ending)
+    for unused in sorted(set(spans_by_id) - used):
+        errors.append({"code": "unplaced_span", "span_id": unused})
+    rendered = "".join(reconstructed)
+    expected = manifest.get("source_text", "")
+    if rendered != expected:
+        errors.append({"code": "source_reconstruction_mismatch", "expected": expected, "actual": rendered})
     return {
-        "schema_version": "handgen_source_contract_v1",
+        "schema_version": "handgen_source_contract_v2",
         "passed": not errors,
-        "checks": [
-            "rendered_span_text_reconstructs_each_source_line",
-            "rendered_lines_reconstruct_source_text",
-            "prose_artifacts_reconstruct_source_text",
-            "math_token_sequence_reconstructs_math_span_text",
-        ],
-        "rendered_source_text": rendered_source,
+        "checks": ["each_span_placed_once_in_source_order", "rendered_lines_and_endings_reconstruct_source",
+                   "worksheet_tokens_and_sample_labels_match_source", "generation_targets_match_source"],
+        "rendered_source_text": rendered,
         "errors": errors,
     }
-
-
-def _math_tokens_to_text(tokens: list[dict[str, Any]]) -> str:
-    pieces: list[str] = []
-    for token in tokens:
-        if token.get("label") == "space":
-            pieces.append(token.get("source_character", token.get("text", " ")))
-        else:
-            pieces.append(token.get("source_character", ""))
-    return "".join(pieces)

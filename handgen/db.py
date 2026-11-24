@@ -4,9 +4,8 @@ import sqlite3
 from pathlib import Path
 from typing import Any
 
-from .paths import DB_PATH
+from .paths import DATA_DIR, DB_PATH
 from .utils import now_iso
-
 
 SCHEMA = """
 PRAGMA foreign_keys = ON;
@@ -25,6 +24,11 @@ CREATE TABLE IF NOT EXISTS style_refs (
   width INTEGER,
   height INTEGER,
   created_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS style_artifacts (
+  style_ref_id INTEGER PRIMARY KEY REFERENCES style_refs(id) ON DELETE CASCADE,
+  manifest_path TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS worksheets (
@@ -122,14 +126,22 @@ def latest_style_ref(con: sqlite3.Connection, writer_id: str) -> sqlite3.Row | N
     ).fetchone()
 
 
-def latest_worksheet(con: sqlite3.Connection, writer_id: str) -> sqlite3.Row | None:
+def latest_worksheet(con: sqlite3.Connection, writer_id: str) -> dict[str, Any] | None:
     rows = con.execute(
         "SELECT * FROM worksheets WHERE writer_id = ? ORDER BY id DESC",
         (writer_id,),
     ).fetchall()
     for row in rows:
-        if Path(row["manifest_path"]).exists():
-            return row
+        path = Path(row["manifest_path"])
+        if path.is_file():
+            return dict(row)
+        # Older databases stored the absolute checkout path. Rebase only
+        # the writer's own canonical worksheet directory.
+        parent = Path("worksheets") / writer_id
+        if path.parent.parent.parts[-2:] == parent.parts:
+            moved = DATA_DIR / parent / path.parent.name / path.name
+            if moved.is_file():
+                return dict(row) | {"manifest_path": str(moved)}
     return None
 
 

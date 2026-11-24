@@ -5,9 +5,20 @@ from handgen.eval.ocr import normalize_text, verify_ocr_text
 
 class OcrVerificationTests(unittest.TestCase):
     def test_accepts_exact_normalized_text(self):
-        result = verify_ocr_text("Pick", "pick\n")
+        result = verify_ocr_text("Pick.", "Pick .\n")
         self.assertTrue(result["passed"], result["reject_reasons"])
         self.assertEqual(normalize_text("Pick."), "pick")
+
+    def test_visible_case_and_punctuation_are_preserved(self):
+        for expected, actual in [("Pick", "pick"), ("Stop.", "Stop"), ("?", ""), ("é", "e")]:
+            with self.subTest(expected=expected, actual=actual):
+                self.assertFalse(verify_ocr_text(expected, actual)["passed"])
+
+    def test_character_distance_separates_two_misspelled_candidates(self):
+        near = verify_ocr_text("number", "numbcr")
+        unrelated = verify_ocr_text("number", "letter")
+        self.assertEqual(near["character_edit_distance"], 1)
+        self.assertGreater(near["match_score"], unrelated["match_score"])
 
     def test_rejects_repeated_or_hallucinated_text(self):
         repeated = verify_ocr_text("Pick", "Pick Pick")

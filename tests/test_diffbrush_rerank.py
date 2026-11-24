@@ -2,12 +2,53 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
-from handgen.diffbrush.runner import DiffBrushRunner
+from handgen.diffbrush.runner import DiffBrushRunner, ProseVerificationError
 
 
 class DiffBrushRerankTests(unittest.TestCase):
+    def test_run_cache_keys_actual_inputs_and_checks_sample_bytes(self):
+        class Model:
+            calls = 0
+
+            def generate_one(self, _prompt, _style, path, **kwargs):
+                self.calls += 1
+                path.write_bytes(b"model output")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            writer = root / "style.png"
+            writer.write_bytes(b"first reference")
+            model = Model()
+            runner = DiffBrushRunner()
+            runner.root = root
+            runner.checkpoint = root / "weights.pt"
+            runner.checkpoint.write_bytes(b"weights")
+            runner._device = SimpleNamespace(type="cpu")
+            args = {"span_id": "same", "prompt": "Notes", "style_ref": writer, "out_dir": root,
+                    "seed": 23, "writer_id": "writer", "conditioning_mode": "prose"}
+            stub = SimpleNamespace(seed_everything=lambda seed: None)
+            with patch.dict("sys.modules", {"handgen.diffbrush.run_single": stub}), patch.object(runner, "_ensure_inner", return_value=model):
+                first = runner._run(**args)
+                self.assertEqual(first, runner._run(**args))
+                self.assertEqual(model.calls, 1)
+                (first.parent / "sample.png").write_bytes(b"incomplete")
+                self.assertEqual(first, runner._run(**args))
+                self.assertEqual(model.calls, 2)
+                second = runner._run(**(args | {"seed": 24}))
+                writer.write_bytes(b"revised reference")
+                third = runner._run(**args)
+                self.assertEqual(len({first, second, third}), 3)
+                self.assertEqual(model.calls, 4)
+
+    def test_unrepresentable_prose_is_reported_before_sampling(self):
+        runner = DiffBrushRunner()
+        with self.assertRaisesRegex(ProseVerificationError, "no glyph"):
+            runner.generate_chunk(span_id="line", text="naïve", style_ref=Path("unused"),
+                                  out_dir=Path("unused"), seed=2, writer_id="writer")
+
     def test_generate_chunk_rejects_bad_ocr_and_accepts_verified_candidate(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -28,6 +69,7 @@ class DiffBrushRerankTests(unittest.TestCase):
                 run = runner.generate_chunk(
                     span_id="span",
                     text="Pick",
+                    prompt_text="Pick",
                     style_ref=root / "style.png",
                     out_dir=root,
                     seed=10,
@@ -106,7 +148,7 @@ class DiffBrushRerankTests(unittest.TestCase):
 
             self.assertFalse(run["exactness_certified"])
             self.assertEqual(run["route"], "diffbrush_last_resort_prose_token")
-            self.assertIn("no non-DiffBrush natural-language fallback", run["best_effort_reason"])
+            self.assertIn("below the configured OCR match threshold", run["best_effort_reason"])
 
     def test_generate_chunk_uses_style_legibility_as_best_effort_floor(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -187,7 +229,7 @@ class DiffBrushRerankTests(unittest.TestCase):
             runner.prose_candidates = 1
             runner.last_resort_retries = 2
             runner.min_best_effort_score = 0.12
-            ocr_results = [{"text": "garbled"}, {"text": "If number"}]
+            ocr_results = [{"text": "garbled"}, {"text": "If number and then"}, {"text": "If number"}]
 
             with patch.object(runner, "validate", lambda: None), patch.object(
                 runner, "_run", side_effect=lambda **kwargs: self._fake_result(root, sample, kwargs["span_id"], kwargs["seed"])
@@ -208,6 +250,8 @@ class DiffBrushRerankTests(unittest.TestCase):
             self.assertTrue(run["exactness_certified"])
             self.assertEqual(run["accepted_candidate"], "span_cand01")
             self.assertEqual(run["candidate_count"], 2)
+            self.assertTrue(run["diffbrush_prompt"].startswith("If number and then"))
+            self.assertTrue(run["ocr_verification"]["estimated_padding_trim"])
 
     def test_prompt_seed_is_stable_across_variant_order(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -264,9 +308,15 @@ class DiffBrushRerankTests(unittest.TestCase):
 
     @staticmethod
     def _fake_styled(_sample: Path, dst: Path, **_kwargs):
+        from PIL import Image, ImageDraw
+
         dst.parent.mkdir(parents=True, exist_ok=True)
-        dst.write_bytes(b"png")
-        return {"path": str(dst), "width": 10, "height": 10, "sha256": "sha"}
+        im = Image.new("RGBA", (140, 24))
+        draw = ImageDraw.Draw(im)
+        for x in [0, 38, 95]:
+            draw.rectangle((x, 4, x + 29, 20), fill="black")
+        im.save(dst)
+        return {"path": str(dst), "width": im.width, "height": im.height, "sha256": "sha"}
 
     @staticmethod
     def _fake_trim(src: Path, dst: Path, *_args, **_kwargs):

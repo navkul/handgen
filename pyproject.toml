@@ -1,7 +1,12 @@
 [project]
 name = "handgen"
 version = "0.1.0"
-description = "Local-first handwriting document generator MVP using DiffBrush prose and worksheet glyph-bank math."
+description = "Render local handwriting samples, model-generated prose and worksheet math to paginated SVG and PNG."
+readme = "README.md"
+authors = [
+  { name = "Arnav Kulkarni" },
+  { name = "Felix Tuchscherer" },
+]
 requires-python = ">=3.11"
 dependencies = [
   "numpy>=1.26",
@@ -9,6 +14,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+vatr = ["torch>=2", "torchvision>=0.14", "safetensors>=0.4"]
+vision = ["pyobjc-framework-Vision>=10; sys_platform == 'darwin'"]
 test = [
   "pytest>=8",
 ]
@@ -34,6 +41,10 @@ diffbrush = [
 
 [project.scripts]
 handgen = "handgen.cli:main"
+
+[project.urls]
+Repository = "https://github.com/navkul/handgen"
+Documentation = "https://github.com/navkul/handgen/blob/main/docs/pipeline.md"
 
 [build-system]
 requires = ["setuptools>=69"]

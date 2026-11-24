@@ -3,9 +3,12 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+import os
 import shutil
 import struct
 import subprocess
+import tempfile
+from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -20,7 +23,8 @@ def sha_text(text: str) -> str:
 
 
 def sha_file(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    with path.open("rb") as f:
+        return hashlib.file_digest(f, "sha256").hexdigest()
 
 
 def read_json(path: Path) -> dict[str, Any]:
@@ -30,6 +34,20 @@ def read_json(path: Path) -> dict[str, Any]:
 def write_json(path: Path, data: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def publish_files(source: Path, destination: Path, names: Sequence[str]) -> None:
+    """Stage all convenience copies, then publish the manifest last under a writer lock."""
+    import fcntl
+
+    with tempfile.TemporaryDirectory(dir=destination) as tmp:
+        stage = Path(tmp)
+        for name in names:
+            shutil.copyfile(source / name, stage / name)
+        with (destination / ".publish.lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            for name in names:
+                os.replace(stage / name, destination / name)
 
 
 def escape_xml(text: str) -> str:
@@ -66,9 +84,7 @@ def render_svg_to_png(svg_path: Path) -> Path:
 def slugify(text: str) -> str:
     out = []
     for ch in text.strip():
-        if ch.isalnum():
-            out.append(ch)
-        elif ch in ("-", "_"):
+        if ch.isalnum() or ch in ("-", "_"):
             out.append(ch)
         else:
             out.append("_")
@@ -78,8 +94,8 @@ def slugify(text: str) -> str:
 
 def require_pillow_numpy() -> tuple[Any, Any]:
     try:
-        from PIL import Image  # type: ignore
         import numpy as np  # type: ignore
+        from PIL import Image  # type: ignore
     except ModuleNotFoundError as exc:
         raise RuntimeError(
             "This command requires Pillow and NumPy. Install the repo dependencies "

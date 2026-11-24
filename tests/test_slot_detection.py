@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from handgen.render.document import _slot_box_for_display
+from handgen.render.carriers import _slot_box_for_display
 
 try:
     from PIL import Image, ImageDraw

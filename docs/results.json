@@ -1,0 +1,1065 @@
+{
+  "description": "Selected fields from local style fit and eval render outputs. Shape losses measure normalized ink overlap and density. Page OCR character edits are summed over physical prose regions. Source paths are relative to the repository root.",
+  "machine": "Apple M5 Pro",
+  "writer_fits": [
+    {
+      "writer_id": "writer_001",
+      "device": "mps",
+      "seed": 732,
+      "steps": 100,
+      "trainable_parameters": 512,
+      "metric": "multiscale_soft_dice_and_ink_density_loss",
+      "train_words": [
+        "for",
+        "of",
+        "Equity",
+        "protection",
+        "exclusive",
+        "be",
+        "to",
+        "function",
+        "name",
+        "legal",
+        "design",
+        "applied",
+        "Value",
+        "both"
+      ],
+      "validation_words": [
+        "Brand",
+        "brand",
+        "Trademark",
+        "Innovation",
+        "can",
+        "each"
+      ],
+      "source_images": [
+        "27347602f6519c3e5eab38a503ee834531d37b659f7b053f772947c61dfed3cd",
+        "c21c2dceab574e6882869216d8165b7c5249195af2fc1441b96ff8e22b29e141",
+        "fc37d685134ec9e9cf7693e064c1cddee9db674b4c821282465a46c264d70675"
+      ],
+      "word_crop_hashes": [
+        "13b2369bc086cfc7b7bd0d1f7e7141abcdcab67b6bf53cfe2f78118f69b8eb19",
+        "db83a91a96978e83d07b861c04246d7502de0d6349d3c7d4212fb183d5ce75ee",
+        "ea85fffea12e7cf8574081a3f8b5044cdc37723e20d7d753ece5073773b1dc8f",
+        "6c34e81a97dec9609ee4e529074c71ff284746a7f6b4b3dac690e63545550a8a",
+        "01e163df5c5518ada81f9bbafd9f2d2ac6e385aab4bbfc6706473c1e2a1fc141",
+        "47c71802efa09e9279f53466cbe4a66131d364e160eb8712963d77d815ed86e0",
+        "a3f730cbd5f9b2e31a2ecae44090ba656444c651bcdb8e94318e7b3bce45e6be",
+        "5279e4dd500a9ab736ba0a45951c42723fa90bed4e931521db11f73f2404f26e",
+        "551f9a4cce949bc529997c76393e5861b42ab0ea3ef3cf2990aa3088b34afa3e",
+        "a02c4b1ca7d3eec705a45c12a65238df7d33dbfaeb93413d44c2ca1e6ea87320",
+        "2bbee15c693835f202cd420217f4c22d12c6c2b27f9f1cf23723c94a1facd9ce",
+        "f1a4af88b47b88d69fdd7a779dba16e96e2811accdfc89522fb80d6303aabf4f",
+        "fa109228c09d893f0ccdc281c17080a77512b6638cba6aaac8a54e18d668e729",
+        "39742e89a7c3f947204a448b1a96d57d866fd1abfeee7e01090d02e3f540da76",
+        "0f548ec7026743faba140996ee6ff26682346bc2d5ef00024de27006ab079482",
+        "b912bf34849c40e2c0406a14ca8f823d7769c4426cf9e797c9e01d85a7ba61aa",
+        "ff4d4707dcf6b49bd068647d819c2dad3033e147778716745504d9266bc9e59d",
+        "3f592cb451a2a802bf27093295bb97009844d7f96ae40c8a8b0656b16049234e",
+        "3347d6c4d34adb71a073cdc7b675253a60bbee625c3a67045021e376d8703184",
+        "4724c937f4a4379d936ff0454bf40a762b09101e9703818024d4a7f9c19d8afd",
+        "f7bfc5df8d08e6a7bd0bce566263d8ecfe9eab281bda974a74f71ad32fb4c306",
+        "280ce93fd09dbdd5c6b207149a42cb7465c288aa23b4481563f6f3e1b3f9c31b"
+      ],
+      "baseline_loss": 0.42786677394594463,
+      "selected_loss": 0.36615563716207233,
+      "selected_step": 70,
+      "validation_history": [
+        {
+          "step": 10,
+          "validation_loss": 0.42411194103104727
+        },
+        {
+          "step": 20,
+          "validation_loss": 0.4224656181676047
+        },
+        {
+          "step": 30,
+          "validation_loss": 0.40995329192706514
+        },
+        {
+          "step": 40,
+          "validation_loss": 0.3982404129845755
+        },
+        {
+          "step": 50,
+          "validation_loss": 0.37400119645254953
+        },
+        {
+          "step": 60,
+          "validation_loss": 0.36702652488436016
+        },
+        {
+          "step": 70,
+          "validation_loss": 0.36615563716207233
+        },
+        {
+          "step": 80,
+          "validation_loss": 0.37626031254019054
+        },
+        {
+          "step": 90,
+          "validation_loss": 0.3697989284992218
+        },
+        {
+          "step": 100,
+          "validation_loss": 0.37572712557656424
+        }
+      ],
+      "checkpoint_sha256": "3b1e4b7cae23652acd5c559117d06ef42fdd5317da2a5e0bc94ea44d8c0eb1ff",
+      "selected_adapter_sha256": "e40ad156ec90004087df1ebdd4bc5ba8b8ec454eadec952319e7d924b59a3b46",
+      "independent_test": {
+        "source_sha256": "71fd46ff179291aad0e516bdd81601b61106bd4c41c615d6e6e72e2c681cf852",
+        "transcript_sha256": "e6551f13d33efa56f8746dcf5c4c7d88fa5953ba0e4bcb079109f686c5b95cf1",
+        "words": [
+          {
+            "word": "our",
+            "source_bbox": [
+              190,
+              26,
+              242,
+              41
+            ],
+            "sample_sha256": "88be20ec08917395c48f3b901ea67881b5147d6c38d58b431c510136cc54a86d",
+            "baseline_loss": 0.37290722131729126,
+            "selected_loss": 0.334972620010376
+          },
+          {
+            "word": "business",
+            "source_bbox": [
+              284,
+              22,
+              418,
+              42
+            ],
+            "sample_sha256": "cc502b1ded54fa9bb39ebae1539592e0e7b5c85b08e0a74589db0d4e6ceea16a",
+            "baseline_loss": 0.4212367534637451,
+            "selected_loss": 0.3547040820121765
+          },
+          {
+            "word": "will",
+            "source_bbox": [
+              538,
+              16,
+              592,
+              38
+            ],
+            "sample_sha256": "d66b218f78eadec26723a5729683c787e36f1789f115933d926252381f49193e",
+            "baseline_loss": 0.4567599892616272,
+            "selected_loss": 0.5451700091362
+          },
+          {
+            "word": "should",
+            "source_bbox": [
+              688,
+              16,
+              785,
+              39
+            ],
+            "sample_sha256": "fa849395493bc125ee8d61da72a42b5fd50d7406ef5820dcadad676ca3747686",
+            "baseline_loss": 0.32015612721443176,
+            "selected_loss": 0.3366236388683319
+          },
+          {
+            "word": "Objectives",
+            "source_bbox": [
+              878,
+              22,
+              1008,
+              43
+            ],
+            "sample_sha256": "222d28fcfabe4869064c6e2144e157939fbdc1a1ae649ba221f00643280ccbd0",
+            "baseline_loss": 0.6213740706443787,
+            "selected_loss": 0.5227173566818237
+          }
+        ],
+        "baseline_loss": 0.4384868323802948,
+        "selected_loss": 0.41883754134178164
+      }
+    },
+    {
+      "writer_id": "writer_002",
+      "device": "mps",
+      "seed": 732,
+      "steps": 100,
+      "trainable_parameters": 512,
+      "metric": "multiscale_soft_dice_and_ink_density_loss",
+      "train_words": [
+        "brown",
+        "over",
+        "fox",
+        "The",
+        "the",
+        "dog",
+        "jumps"
+      ],
+      "validation_words": [
+        "quick",
+        "lazy"
+      ],
+      "source_images": [
+        "94b28e206340bceee875a0e27741650365088a1a26cc84509e77e54c5f005179"
+      ],
+      "word_crop_hashes": [
+        "b5ba61c4de504f6ca8a22fbb93998fd097235332579d3f954c30ab92a2fe040f",
+        "40b3fd2b2b93cf3b7a5408d35ef00630b82048e4eb548da021be7adc7711ce2d",
+        "f9310135076ee6423bd15fbdee39075a508860043c598bdce27c0f34d7f8baef",
+        "ab720ca806a938444e4dbadd1ff9a4ec5895be3042bdbbd1ab931625b71a4ff4",
+        "731b991c6746c44f06a45589eb312ef90903e57130e33cacf128b1d010bcc8ae",
+        "e1abb4e9e15fdd3fcb9861286abdd2a69d6e0f34724918b9c6a8046fdeb8efbe",
+        "1289d9437aff78152e271db602d331d1cff549c9ecdb17e36bc1bb3452352976",
+        "9aad52f9dec1e6eaaf82ea4ea0c61de2fd446a0dfdf81bfd12e3e9fc35596cdb",
+        "6070a69174186bbb8df4dfaa1a920458da2e723a55197f9fad06ab836c0d98c6"
+      ],
+      "baseline_loss": 0.285654678940773,
+      "selected_loss": 0.2544393613934517,
+      "selected_step": 10,
+      "validation_history": [
+        {
+          "step": 10,
+          "validation_loss": 0.2544393613934517
+        },
+        {
+          "step": 20,
+          "validation_loss": 0.2639786899089813
+        },
+        {
+          "step": 30,
+          "validation_loss": 0.28800301253795624
+        },
+        {
+          "step": 40,
+          "validation_loss": 0.29157207906246185
+        },
+        {
+          "step": 50,
+          "validation_loss": 0.2859092354774475
+        },
+        {
+          "step": 60,
+          "validation_loss": 0.29383718967437744
+        },
+        {
+          "step": 70,
+          "validation_loss": 0.30149611830711365
+        },
+        {
+          "step": 80,
+          "validation_loss": 0.2974966913461685
+        },
+        {
+          "step": 90,
+          "validation_loss": 0.30750952661037445
+        },
+        {
+          "step": 100,
+          "validation_loss": 0.3008413761854172
+        }
+      ],
+      "checkpoint_sha256": "3b1e4b7cae23652acd5c559117d06ef42fdd5317da2a5e0bc94ea44d8c0eb1ff",
+      "selected_adapter_sha256": "94cf15bd0fe73751f98d7d8b5fa0a4172192e5b945bc2c06f1bb29a8fe505829"
+    }
+  ],
+  "prose_only_page_comparison": [
+    {
+      "source": "examples/prose_only.txt",
+      "source_file_sha256": "20c979f883f517b70705a73fd795e7b5df756263bd67112638bf09c49883459c",
+      "writer_id": "writer_001",
+      "prose_mode": "diffbrush",
+      "render_seed": 2026051301,
+      "adapter_sha256": null,
+      "route_counts": {
+        "diffbrush_best_effort_prose_token": 1,
+        "diffbrush_last_resort_prose_token": 3
+      },
+      "evidence_counts": {
+        "best_effort": 4
+      },
+      "page_ocr": {
+        "pages": 1,
+        "character_edits": 16,
+        "target_characters": 124,
+        "exact_regions": 1
+      },
+      "regions": [
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Assume the sequence is increasing.",
+          "actual": "Assume the sequence is increasing.",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Then each later term is at least",
+          "actual": "Then each later is at least least",
+          "character_edit_distance": 9
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "as large as the one before it.",
+          "actual": "as large as the one befor...",
+          "character_edit_distance": 4
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Therefore the claim follows.",
+          "actual": "Therefore the clain follaws..",
+          "character_edit_distance": 3
+        }
+      ]
+    },
+    {
+      "source": "examples/prose_only.txt",
+      "source_file_sha256": "20c979f883f517b70705a73fd795e7b5df756263bd67112638bf09c49883459c",
+      "writer_id": "writer_001",
+      "prose_mode": "vatr",
+      "render_seed": 2026051301,
+      "adapter_sha256": null,
+      "route_counts": {
+        "vatr_word": 23
+      },
+      "evidence_counts": {
+        "ocr_match": 19,
+        "best_effort": 4
+      },
+      "page_ocr": {
+        "pages": 1,
+        "character_edits": 4,
+        "target_characters": 124,
+        "exact_regions": 1
+      },
+      "regions": [
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Assume the sequence is increasing.",
+          "actual": "Assume the sequence is increasing .",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Then each later term is at least as large",
+          "actual": "Then each later terry is at least as large",
+          "character_edit_distance": 2
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "as the one before it.",
+          "actual": "as the one before it",
+          "character_edit_distance": 1
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Therefore the claim follows.",
+          "actual": "There fore the claim follows.",
+          "character_edit_distance": 1
+        }
+      ]
+    },
+    {
+      "source": "examples/prose_only.txt",
+      "source_file_sha256": "20c979f883f517b70705a73fd795e7b5df756263bd67112638bf09c49883459c",
+      "writer_id": "writer_001",
+      "prose_mode": "vatr",
+      "render_seed": 2026051301,
+      "adapter_sha256": "e40ad156ec90004087df1ebdd4bc5ba8b8ec454eadec952319e7d924b59a3b46",
+      "route_counts": {
+        "vatr_word": 23
+      },
+      "evidence_counts": {
+        "ocr_match": 21,
+        "best_effort": 2
+      },
+      "page_ocr": {
+        "pages": 1,
+        "character_edits": 1,
+        "target_characters": 124,
+        "exact_regions": 3
+      },
+      "regions": [
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Assume the sequence is increasing.",
+          "actual": "Assume the sequence is increasing .",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Then each later term is at least as large",
+          "actual": "Then each later term , is at least as large",
+          "character_edit_distance": 1
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "as the one before it.",
+          "actual": "as the one before it.",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Therefore the claim follows.",
+          "actual": "Therefore the claim follows.",
+          "character_edit_distance": 0
+        }
+      ]
+    },
+    {
+      "source": "examples/prose_only.txt",
+      "source_file_sha256": "20c979f883f517b70705a73fd795e7b5df756263bd67112638bf09c49883459c",
+      "writer_id": "writer_001",
+      "prose_mode": "auto",
+      "render_seed": 2026051301,
+      "adapter_sha256": null,
+      "route_counts": {
+        "worksheet_prose": 7,
+        "diffbrush_verified_crop": 6
+      },
+      "evidence_counts": {
+        "worksheet_labels": 7,
+        "ocr_match": 6
+      },
+      "page_ocr": {
+        "pages": 1,
+        "character_edits": 0,
+        "target_characters": 124,
+        "exact_regions": 4
+      },
+      "regions": [
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Assume the sequence is increasing.",
+          "actual": "Assume the sequence is increasing.",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Then each later term is at least",
+          "actual": "Then each later term is at least",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "as large as the one before it.",
+          "actual": "as large as the one before it.",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Therefore the claim follows.",
+          "actual": "Therefore the claim follows.",
+          "character_edit_distance": 0
+        }
+      ]
+    },
+    {
+      "source": "examples/prose_only.txt",
+      "source_file_sha256": "20c979f883f517b70705a73fd795e7b5df756263bd67112638bf09c49883459c",
+      "writer_id": "writer_001",
+      "prose_mode": "auto",
+      "render_seed": 2026051301,
+      "adapter_sha256": "e40ad156ec90004087df1ebdd4bc5ba8b8ec454eadec952319e7d924b59a3b46",
+      "route_counts": {
+        "vatr_word": 5,
+        "diffbrush_verified_crop": 6,
+        "worksheet_prose": 2
+      },
+      "evidence_counts": {
+        "ocr_match": 11,
+        "worksheet_labels": 2
+      },
+      "page_ocr": {
+        "pages": 1,
+        "character_edits": 0,
+        "target_characters": 124,
+        "exact_regions": 4
+      },
+      "regions": [
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Assume the sequence is increasing.",
+          "actual": "Assume the sequence is increasing.",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "trocr",
+          "expected": "Then each later term is at least",
+          "actual": "Then each later term is at least",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "as large as the one before it.",
+          "actual": "as large as the one before it.",
+          "character_edit_distance": 0
+        },
+        {
+          "page": 1,
+          "reader": "vision",
+          "expected": "Therefore the claim follows.",
+          "actual": "Therefore the claim follows.",
+          "character_edit_distance": 0
+        }
+      ]
+    }
+  ],
+  "odd_integer_proof": {
+    "source": "examples/odd_integer_proof.txt",
+    "source_file_sha256": "f4f0c7f6ea89a1876b08ea1d72a1be39a7d52da250510f2c2afa1f4ca80139f3",
+    "writer_id": "writer_001",
+    "prose_mode": "vatr",
+    "render_seed": 2026051301,
+    "adapter_sha256": "e40ad156ec90004087df1ebdd4bc5ba8b8ec454eadec952319e7d924b59a3b46",
+    "route_counts": {
+      "vatr_word": 25,
+      "worksheet_symbol_math": 4
+    },
+    "evidence_counts": {
+      "ocr_match": 23,
+      "worksheet_labels": 4,
+      "best_effort": 2
+    },
+    "page_ocr": {
+      "pages": 1,
+      "character_edits": 2,
+      "target_characters": 118,
+      "exact_regions": 7
+    },
+    "regions": [
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "Let",
+        "actual": "Let",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "be any integer.",
+        "actual": "be any integer.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "Divide",
+        "actual": "Divide",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "by two.",
+        "actual": "by two.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "The quotient is",
+        "actual": "The quotient is",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "with remainder one.",
+        "actual": "with remainder one.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "trocr",
+        "expected": "A remainder of one means it is odd.",
+        "actual": "a remainder of one means it is odd .",
+        "character_edit_distance": 1
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "Thus",
+        "actual": "Thes",
+        "character_edit_distance": 1
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "is always odd.",
+        "actual": "is always odd.",
+        "character_edit_distance": 0
+      }
+    ],
+    "placements": [
+      {
+        "text": "Let",
+        "line_index": 0,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "Let"
+      },
+      {
+        "text": " ",
+        "line_index": 0,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "n",
+        "line_index": 0,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 0,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "be",
+        "line_index": 0,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "be"
+      },
+      {
+        "text": " ",
+        "line_index": 0,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "any",
+        "line_index": 0,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "any"
+      },
+      {
+        "text": " ",
+        "line_index": 0,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "integer.",
+        "line_index": 0,
+        "route": "vatr_word",
+        "evidence": "best_effort",
+        "crop_ocr": "integer,"
+      },
+      {
+        "text": "Divide",
+        "line_index": 1,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "Divide"
+      },
+      {
+        "text": " ",
+        "line_index": 1,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "2n + 1",
+        "line_index": 1,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "2",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "2"
+            ],
+            "source_sha256": [
+              "4a4be210815dc026cfb1dd888372009325cc749c604946f774d564d56f984b3a"
+            ]
+          },
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          },
+          {
+            "source_character": "+",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "+"
+            ],
+            "source_sha256": [
+              "4f41804ad0244be54a18c6baea35ac863485da6a97bea4a22586b1b0268e0349"
+            ]
+          },
+          {
+            "source_character": "1",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "1"
+            ],
+            "source_sha256": [
+              "6040a607858570e37504f23ce1921e625422e6a10beea0e71f1e823dc72ebf09"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 1,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "by",
+        "line_index": 1,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "by"
+      },
+      {
+        "text": " ",
+        "line_index": 1,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "two.",
+        "line_index": 1,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "two."
+      },
+      {
+        "text": "The",
+        "line_index": 2,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "The"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "quotient",
+        "line_index": 2,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "quotient"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "is",
+        "line_index": 2,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "is"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "n",
+        "line_index": 2,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "with",
+        "line_index": 2,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "with"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "remainder",
+        "line_index": 2,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "remainder"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "one.",
+        "line_index": 2,
+        "route": "vatr_word",
+        "evidence": "best_effort",
+        "crop_ocr": "оне."
+      },
+      {
+        "text": "A",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "A"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "remainder",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "remainder"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "of",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "of"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "one",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "one"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "means",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "means"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "it",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "it"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "is",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "is"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "odd.",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "odd."
+      },
+      {
+        "text": "Thus",
+        "line_index": 4,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "Thus"
+      },
+      {
+        "text": " ",
+        "line_index": 4,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "2n + 1",
+        "line_index": 4,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "2",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "2"
+            ],
+            "source_sha256": [
+              "4a4be210815dc026cfb1dd888372009325cc749c604946f774d564d56f984b3a"
+            ]
+          },
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          },
+          {
+            "source_character": "+",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "+"
+            ],
+            "source_sha256": [
+              "4f41804ad0244be54a18c6baea35ac863485da6a97bea4a22586b1b0268e0349"
+            ]
+          },
+          {
+            "source_character": "1",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "1"
+            ],
+            "source_sha256": [
+              "6040a607858570e37504f23ce1921e625422e6a10beea0e71f1e823dc72ebf09"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 4,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "is",
+        "line_index": 4,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "is"
+      },
+      {
+        "text": " ",
+        "line_index": 4,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "always",
+        "line_index": 4,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "always"
+      },
+      {
+        "text": " ",
+        "line_index": 4,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "odd.",
+        "line_index": 4,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "odd."
+      }
+    ]
+  }
+}

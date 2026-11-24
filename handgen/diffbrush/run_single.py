@@ -6,9 +6,10 @@ import json
 import os
 import random
 import sys
+from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 import numpy as np
 
@@ -19,9 +20,11 @@ from diffusers import AutoencoderKL
 from PIL import Image
 from torchvision.transforms.functional import to_pil_image
 
+from handgen.diffbrush import DiffBrushUnavailable
+from handgen.diffbrush.prompt import canvas_width
+from handgen.diffbrush.prompt import model_text as normalize_text
 
 WRITER_NUMS = 496
-IAM_LETTERS = " _!\"#&'()*+,-./0123456789:;?ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 REPO_DEFAULT = Path(__file__).resolve().parents[2] / "models" / "diffbrush" / "third_party_repo"
 
 
@@ -44,6 +47,8 @@ def ensure_repo_importable(repo_path: Path) -> None:
 def select_device(requested: str) -> torch.device:
     normalized = requested.strip().lower()
     if normalized in {"", "auto"}:
+        if torch.cuda.is_available():
+            return torch.device("cuda")
         if torch.backends.mps.is_available():
             return torch.device("mps")
         return torch.device("cpu")
@@ -112,17 +117,19 @@ def load_vae(device: torch.device) -> AutoencoderKL:
         ("runwayml/stable-diffusion-v1-5", "vae"),
     ]
     last_error: Exception | None = None
-    for model_id, subfolder in candidates:
-        try:
-            kwargs = {"subfolder": subfolder} if subfolder else {}
-            vae = AutoencoderKL.from_pretrained(model_id, **kwargs)
+    for local_only in (True, False):
+        for model_id, subfolder in candidates:
+            try:
+                kwargs = {"subfolder": subfolder} if subfolder else {}
+                vae = AutoencoderKL.from_pretrained(model_id, local_files_only=local_only, **kwargs)
+            except OSError as error:
+                last_error = error
+                continue
             vae.to(device)
             vae.requires_grad_(False)
             vae.eval()
             return vae
-        except Exception as error:
-            last_error = error
-    raise RuntimeError(f"Unable to load a Stable Diffusion VAE: {last_error}")
+    raise DiffBrushUnavailable(f"Unable to load a Stable Diffusion VAE: {last_error}")
 
 
 def make_content_dataset(repo_path: Path, style_dir: Path):
@@ -133,13 +140,15 @@ def make_content_dataset(repo_path: Path, style_dir: Path):
         return IAMGenerateDataset(str(style_dir), "test", ref_num=1)
 
 
-def normalize_text(text: str) -> str:
-    return "".join(char if char in IAM_LETTERS else " " for char in text)
-
-
 def load_style_tensor(style_image_path: Path, device: torch.device, min_width: int = 512, max_width: int = 1024) -> torch.Tensor:
-    image = Image.open(style_image_path).convert("L")
+    with Image.open(style_image_path) as source:
+        image = source.convert("L")
     target_height = 64
+    if image.height != target_height or not min_width <= image.width <= max_width:
+        # Legacy registrations and the standalone runner may receive an entire
+        # page. Use the same line extraction as style add before model resizing.
+        from handgen.ingest.style import primary_condition_image
+        image = primary_condition_image(style_image_path)
     scaled_width = max(1, round(image.width * target_height / image.height))
     image = image.resize((scaled_width, target_height), Image.Resampling.LANCZOS)
 
@@ -166,8 +175,8 @@ def save_grayscale(tensor: torch.Tensor, output_path: Path) -> None:
 
 def seed_everything(seed: int) -> None:
     random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
+    np.random.seed(seed % (2**32))
+    torch.manual_seed(seed % (2**64))
 
 
 class DiffBrushSingleRunner:
@@ -186,14 +195,12 @@ class DiffBrushSingleRunner:
 
     def generate_one(self, text: str, style_image_path: Path, output_path: Path, sampling_timesteps: int, eta: float = 0.0) -> None:
         normalized_text = normalize_text(text)
-        if not normalized_text.strip():
-            raise ValueError(f"DiffBrush target contains no supported characters: {text!r}")
 
-        with working_directory(self.repo_path), torch.inference_mode():
+        with torch.inference_mode():
             style_input = load_style_tensor(style_image_path, self.device)
             text_ref = self.dataset.get_content(normalized_text).to(self.device)
             latent = torch.randn(
-                (1, 4, style_input.shape[2] // 8, self.dataset.fixed_len // 8),
+                (1, 4, style_input.shape[2] // 8, canvas_width(normalized_text) // 8),
                 device=self.device,
             )
             generated = self.diffusion.ddim_sample(
@@ -210,10 +217,9 @@ class DiffBrushSingleRunner:
 
 
 def find_style_dir(style_image: Path) -> Path:
-    parent = style_image.parent
-    if any(parent.glob("*.png")):
-        return parent
-    raise FileNotFoundError(f"No PNG style references found alongside style image: {style_image}")
+    if not style_image.is_file():
+        raise FileNotFoundError(f"Style image not found: {style_image}")
+    return style_image.parent
 
 
 def run_once(args: argparse.Namespace, device: torch.device) -> dict[str, Any]:
@@ -250,6 +256,8 @@ def run_once(args: argparse.Namespace, device: torch.device) -> dict[str, Any]:
         "conditioning_mode": args.conditioning_mode,
         "seed": args.seed,
         "steps": args.steps,
+        "eta": float(args.eta),
+        "canvas_width": canvas_width(normalize_text(args.prompt)),
         "device": device.type,
         "repo_root": str(repo_root),
         "checkpoint": str(checkpoint),

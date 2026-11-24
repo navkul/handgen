@@ -1,22 +1,57 @@
 from __future__ import annotations
 
+import hashlib
+import json
+import os
 import re
 import subprocess
-from collections import deque
+import tempfile
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-from ..utils import now_iso, png_size, require_pillow_numpy, sha_file, write_json
+import numpy as np
+from PIL import Image, ImageFilter, ImageOps
 
+from ..utils import now_iso, read_json, sha_file, write_json
+from .paper import components, otsu_threshold, paper_luminance, remove_rules
 
 ROW_SPECS = [
     {"id": "digits", "kind": "glyphs", "labels": list("0123456789")},
     {
         "id": "punctuation_operators",
         "kind": "glyphs",
-        "labels": [".", ",", ";", ":", "!", "?", "'", '"', "-", "(", ")", "[", "]", "{", "}", "<", ">", "+", "=", "*", "/", "_", "|"],
+        "labels": [
+            ".",
+            ",",
+            ";",
+            ":",
+            "!",
+            "?",
+            "'",
+            '"',
+            "-",
+            "(",
+            ")",
+            "[",
+            "]",
+            "{",
+            "}",
+            "<",
+            ">",
+            "+",
+            "=",
+            "*",
+            "/",
+            "_",
+            "|",
+        ],
     },
-    {"id": "greek_symbols", "kind": "glyphs", "labels": ["alpha", "beta", "gamma", "theta", "lambda", "mu", "pi", "sigma"]},
+    {
+        "id": "greek_symbols",
+        "kind": "glyphs",
+        "labels": ["alpha", "beta", "gamma", "theta", "lambda", "mu", "pi", "sigma"],
+    },
     {"id": "lowercase_letters", "kind": "glyphs", "labels": list("abcdefghijklmnopqrstuvwxyz")},
     {"id": "uppercase_letters", "kind": "glyphs", "labels": list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")},
 ]
@@ -51,244 +86,449 @@ def slug(label: str) -> str:
     return names.get(label, re.sub(r"[^A-Za-z0-9]+", "_", label).strip("_") or "glyph")
 
 
-def rasterize_source(source: Path, out_png: Path, dpi: int) -> None:
-    out_png.parent.mkdir(parents=True, exist_ok=True)
+def _paper_image(source: Path, work: Path, dpi: int) -> tuple[Image.Image, tuple[int, int]]:
+    page = source
     if source.suffix.lower() == ".pdf":
         subprocess.run(
-            ["pdftoppm", "-png", "-r", str(dpi), "-f", "1", "-singlefile", str(source), str(out_png.with_suffix(""))],
+            ["pdftoppm", "-png", "-r", str(dpi), "-f", "1", "-singlefile", str(source), str(work / "page")],
             check=True,
         )
-    else:
-        Image, _ = require_pillow_numpy()
-        Image.open(source).convert("RGB").save(out_png)
+        page = work / "page.png"
+    with Image.open(page) as original:
+        upright = ImageOps.exif_transpose(original)
+        original_size = upright.size
+        upright.thumbnail((3600, 3600), Image.Resampling.LANCZOS)
+        return paper_luminance(upright), original_size
 
 
-def dark_mask(image: Any) -> Any:
-    _, np = require_pillow_numpy()
+def dark_mask(image: Image.Image) -> np.ndarray:
+    """Separate ink from paper using between-class variance in luminance."""
     arr = np.asarray(image.convert("L"))
-    return arr < 105
+    return arr <= min(242, otsu_threshold(arr))
 
 
-def components(mask: Any) -> list[dict[str, int]]:
-    _, np = require_pillow_numpy()
-    h, w = mask.shape
-    seen = np.zeros(mask.shape, dtype=bool)
-    out: list[dict[str, int]] = []
-    for y in range(h):
-        xs = np.where(mask[y] & ~seen[y])[0]
-        for x0 in xs.tolist():
-            if seen[y, x0] or not mask[y, x0]:
-                continue
-            q: deque[tuple[int, int]] = deque([(x0, y)])
-            seen[y, x0] = True
-            min_x = max_x = x0
-            min_y = max_y = y
-            area = 0
-            while q:
-                x, yy = q.popleft()
-                area += 1
-                min_x = min(min_x, x)
-                max_x = max(max_x, x)
-                min_y = min(min_y, yy)
-                max_y = max(max_y, yy)
-                for nx, ny in ((x + 1, yy), (x - 1, yy), (x, yy + 1), (x, yy - 1)):
-                    if 0 <= nx < w and 0 <= ny < h and mask[ny, nx] and not seen[ny, nx]:
-                        seen[ny, nx] = True
-                        q.append((nx, ny))
-            if area >= 18 and (max_x - min_x) >= 2 and (max_y - min_y) >= 2:
-                out.append({"x0": min_x, "y0": min_y, "x1": max_x + 1, "y1": max_y + 1, "area": area})
-    return out
+def _glyph_height(comps: list[dict[str, int]]) -> float:
+    if not comps:
+        raise ValueError("No handwriting detected on the worksheet")
+    areas = np.sort([c["area"] for c in comps])
+    # Use an ink-area weighted median to avoid measuring the size of page speckles.
+    typical_area = areas[np.searchsorted(np.cumsum(areas), areas.sum() * 0.5)]
+    return max(3.0, float(np.median([c["y1"] - c["y0"] for c in comps if c["area"] >= 0.22 * typical_area])))
 
 
-def group_rows(comps: list[dict[str, int]]) -> list[dict[str, Any]]:
-    comps = sorted(comps, key=lambda c: ((c["y0"] + c["y1"]) / 2, c["x0"]))
+def _rotation(comps: list[dict[str, int]], height: float) -> float:
+    anchors = [c for c in comps if height * 0.5 <= c["y1"] - c["y0"] <= height * 2.1]
+    if len(anchors) < 5:
+        return 0.0
+    x = np.array([(c["x0"] + c["x1"]) / 2 for c in anchors])
+    y = np.array([(c["y0"] + c["y1"]) / 2 for c in anchors])
+    if np.ptp(x) < 4 * height:
+        return 0.0
+    angles = np.arange(-9.0, 9.01, 0.25)
+    scores = []
+    # The correct angle clusters glyph centers into narrow horizontal bands.
+    # Linear binning avoids a score jump when a glyph crosses a bin boundary.
+    for angle in angles:
+        projected = (y - x * np.tan(np.deg2rad(angle))) / max(1.0, height * 0.35)
+        projected -= projected.min()
+        bins = projected.astype(int)
+        fractions = projected - bins
+        hist = np.bincount(bins, 1 - fractions, minlength=bins.max() + 2)
+        hist += np.bincount(bins + 1, fractions, minlength=hist.size)
+        smooth = np.convolve(hist, [0.25, 0.5, 0.25])
+        scores.append(float(smooth @ smooth))
+    best = int(np.argmax(scores))
+    if scores[best] < 1.045 * scores[len(angles) // 2]:
+        return 0.0
+    return float(angles[best])
+
+
+def _rule_rotation(mask: np.ndarray) -> float:
+    # Long ruled/grid lines can join many letters into a single component.
+    # In that case measure the lines themselves, refining to less than one
+    # pixel of tilt over the width of a typical scan.
+    y, x = np.nonzero(mask)
+    stride = max(1, len(x) // 60_000)
+    y = y[::stride] - mask.shape[0] / 2
+    x = x[::stride] - mask.shape[1] / 2
+
+    def score(angle: float) -> float:
+        slope = np.tan(np.deg2rad(angle))
+        result = 0.0
+        for projected in (y - slope * x, x + slope * y):
+            bins = np.rint(projected).astype(int)
+            histogram = np.bincount(bins - bins.min()).astype(float)
+            result += float(histogram @ histogram)
+        return result
+
+    coarse = max(np.arange(-9.0, 9.01, 0.25), key=score)
+    return round(float(max(np.arange(coarse - 0.15, coarse + 0.151, 0.025), key=score)), 3)
+
+
+def _clear_margin_shadows(gray: Image.Image, mask: np.ndarray, comps: list[dict[str, int]]) -> Image.Image:
+    # An illumination jump at the edge of a photographed sheet can dominate
+    # both the threshold and glyph-height estimate. Identify only broad, dense
+    # margin marks far larger than the other ink, preserving nearby letters.
+    if len(comps) < 8:
+        return gray
+    span = min(gray.size)
+    min_area = max(0.002 * mask.size, 25 * np.percentile([c["area"] for c in comps], 75))
+    oversized = [
+        c
+        for c in comps
+        if c["area"] > min_area
+        and min(c["x0"], c["y0"], gray.width - c["x1"], gray.height - c["y1"]) < 0.055 * span
+    ]
+    if not oversized:
+        return gray
+    labels = np.zeros(mask.shape, np.int32)
+    components(mask, labels=labels)
+    remove = np.zeros_like(mask)
+    for c in oversized:
+        region = np.s_[c["y0"] : c["y1"], c["x0"] : c["x1"]]
+        component = labels[region] == c["component_id"]
+        # Dense shadow patches fill paper-sized tiles. Narrow lines of a grid
+        # still have abundant paper inside the same tiles.
+        small = Image.fromarray(component).convert("L")
+        tile = max(4.0, span * 0.013)
+        small = small.resize(tuple(max(1, round(n / tile)) for n in small.size), Image.Resampling.BOX)
+        if small.getextrema()[1] > 245:
+            remove[region] |= component
+    if not remove.any():
+        return gray
+    cleaned = gray.copy()
+    cleaned.paste(255, mask=Image.fromarray(remove).convert("L").filter(ImageFilter.MaxFilter(3)))
+    return cleaned
+
+
+def _foreground(gray: Image.Image) -> tuple[Image.Image, list[dict[str, int]], float, float]:
+    mask = dark_mask(gray)
+    comps = components(mask)
+    original = gray
+    gray = _clear_margin_shadows(gray, mask, comps)
+    if gray is not original:
+        mask = dark_mask(gray)
+        comps = components(mask)
+
+    def spans_page(c: dict[str, int]) -> bool:
+        w, h = c["x1"] - c["x0"], c["y1"] - c["y0"]
+        if w > 0.55 * gray.width and h > 0.65 * gray.height:
+            return c["area"] < 0.2 * w * h  # a connected grid
+        return (w > 0.55 * gray.width and w > 4.5 * h) or (h > 0.65 * gray.height and h > 4.5 * w)
+
+    has_rule = len(comps) > 2 and any(spans_page(c) for c in comps)
+    angle = _rule_rotation(mask) if has_rule else _rotation(comps, _glyph_height(comps))
+    if angle:
+        gray = gray.rotate(angle, resample=Image.Resampling.BICUBIC, expand=True, fillcolor=255)
+    if has_rule:
+        dark = 255 - np.asarray(gray)
+        # Exclude page margins introduced by the rotations when measuring how
+        # much of each row is ruled. Retain coordinates in the deskewed page.
+        bounds = Image.fromarray(dark_mask(gray)).getbbox()
+        if bounds:
+            x0, y0, x1, y1 = bounds
+            region = dark[y0:y1, x0:x1]
+            remove_rules(region)
+            gray = Image.fromarray(255 - dark)
+    if angle or has_rule:
+        mask = dark_mask(gray)
+        comps = components(mask)
+    height = _glyph_height(comps)
+    min_area = max(2, height * height * 0.006)
+    comps = [c for c in comps if c["area"] >= min_area]
+    if not comps:
+        raise ValueError("No usable ink components detected on the worksheet")
+    keep = np.zeros(mask.shape, dtype=bool)
+    for c in comps:
+        box = np.s_[c["y0"] : c["y1"], c["x0"] : c["x1"]]
+        keep[box] |= mask[box]
+    # Recover soft stroke edges around ink, while discarding the page's dot grid.
+    support = Image.fromarray(keep).convert("L").filter(ImageFilter.MaxFilter(3))
+    arr = np.asarray(gray)
+    darkness = 255.0 - arr.astype("float32")
+    ink_white = max(1.0, float(np.percentile(darkness[keep], 85)))
+    cleaned = np.where(np.asarray(support) > 0, 255 - np.minimum(255, darkness * (255 / ink_white)), 255)
+    return Image.fromarray(cleaned.astype("uint8")), comps, height, angle
+
+
+def group_rows(comps: list[dict[str, int]], height: float | None = None) -> list[dict[str, Any]]:
+    height = _glyph_height(comps) if height is None else height
     rows: list[dict[str, Any]] = []
-    for comp in comps:
-        cy = (comp["y0"] + comp["y1"]) / 2
-        for row in rows:
-            if abs(cy - row["cy"]) < 58:
-                row["components"].append(comp)
-                n = len(row["components"])
-                row["cy"] = ((row["cy"] * (n - 1)) + cy) / n
-                break
-        else:
-            rows.append({"cy": cy, "components": [comp]})
-    normalized = []
-    for row in sorted(rows, key=lambda r: r["cy"]):
-        comps_row = sorted(row["components"], key=lambda c: c["x0"])
-        if sum(c["area"] for c in comps_row) < 60:
-            continue
-        normalized.append(
-            {
-                "cy": row["cy"],
-                "x0": min(c["x0"] for c in comps_row),
-                "y0": min(c["y0"] for c in comps_row),
-                "x1": max(c["x1"] for c in comps_row),
-                "y1": max(c["y1"] for c in comps_row),
-                "components": comps_row,
-            }
-        )
-    return normalized
-
-
-def x_groups(mask: Any, row_box: tuple[int, int, int, int], gap: int = 28) -> list[tuple[int, int]]:
-    _, np = require_pillow_numpy()
-    x0, y0, x1, y1 = row_box
-    sub = mask[y0:y1, x0:x1]
-    active_cols = np.where(sub.sum(axis=0) > 0)[0]
-    if len(active_cols) == 0:
-        return []
-    groups: list[tuple[int, int]] = []
-    start = int(active_cols[0])
-    prev = int(active_cols[0])
-    for x in active_cols[1:]:
-        x = int(x)
-        if x - prev > gap:
-            groups.append((x0 + start, x0 + prev + 1))
-            start = x
-        prev = x
-    groups.append((x0 + start, x0 + prev + 1))
-    return groups
-
-
-def crop_save(image: Any, box: tuple[int, int, int, int], path: Path, pad: int = 14) -> dict[str, Any]:
-    w, h = image.size
-    x0, y0, x1, y1 = box
-    padded = (max(0, x0 - pad), max(0, y0 - pad), min(w, x1 + pad), min(h, y1 + pad))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    crop = image.crop(padded).convert("L")
-    crop.save(path)
-    return {"path": str(path), "bbox": list(padded), "width": crop.width, "height": crop.height, "sha256": sha_file(path)}
-
-
-def _row_box(row: dict[str, Any]) -> tuple[int, int, int, int]:
-    return (row["x0"], row["y0"], row["x1"], row["y1"])
-
-
-def _consume_spec_rows(mask: Any, rows: list[dict[str, Any]], start_idx: int, spec_idx: int) -> tuple[list[dict[str, Any]], int]:
-    spec = ROW_SPECS[spec_idx]
-    labels = spec["labels"]
-    remaining_specs = len(ROW_SPECS) - spec_idx - 1
-    max_idx = len(rows) - remaining_specs
-    consumed: list[dict[str, Any]] = []
-    detected = 0
-    row_idx = start_idx
-    while row_idx < max_idx:
-        row = rows[row_idx]
-        row_box = _row_box(row)
-        groups = x_groups(mask, row_box)
-        consumed.append({"source_row_index": row_idx, "row": row, "row_box": row_box, "groups": groups})
-        detected += len(groups)
-        row_idx += 1
-        if spec["id"] == "greek_symbols" and detected == len(labels) - 1:
-            break
-        if detected >= len(labels):
-            break
-    return consumed, row_idx
+    for c in sorted(comps, key=lambda c: (c["y0"] + c["y1"], c["x0"])):
+        center = (c["y0"] + c["y1"]) / 2
+        if not rows or center - rows[-1]["cy"] > height * 1.35:
+            rows.append({"cy": center, "components": []})
+        row = rows[-1]
+        row["components"].append(c)
+        row["cy"] += (center - row["cy"]) / len(row["components"])
+    for row in rows:
+        parts = row["components"]
+        # Join dots, crossbars and double quotes at the writer's scale.
+        boxes: list[list[int]] = []
+        for c in sorted(parts, key=lambda c: c["x0"]):
+            if boxes and c["x0"] - boxes[-1][2] <= 0.34 * height:
+                prior = boxes[-1]
+                prior[1] = min(prior[1], c["y0"])
+                prior[2] = max(prior[2], c["x1"])
+                prior[3] = max(prior[3], c["y1"])
+            else:
+                boxes.append([c["x0"], c["y0"], c["x1"], c["y1"]])
+        row["boxes"] = boxes
+    return rows
 
 
 def _labels_for_groups(spec: dict[str, Any], group_count: int) -> tuple[list[str], list[str]]:
     labels = list(spec["labels"])
-    if (
-        spec["id"] == "greek_symbols"
-        and group_count == 7
-        and labels == ["alpha", "beta", "gamma", "theta", "lambda", "mu", "pi", "sigma"]
-    ):
-        return ["alpha", "beta", "theta", "lambda", "mu", "pi", "sigma"], ["gamma"]
+    if spec == ROW_SPECS[2] and group_count == 7:
+        return [label for label in labels if label != "gamma"], ["gamma"]
     return labels, []
 
 
-def ingest_worksheet(writer_id: str, source: Path, out_dir: Path, dpi: int = 220) -> dict[str, Any]:
-    Image, _ = require_pillow_numpy()
-    out_dir.mkdir(parents=True, exist_ok=True)
-    local_source = source
-    if source.suffix.lower() == ".pdf":
-        page_png = out_dir / "worksheet_page.png"
-        rasterize_source(source, page_png, dpi)
-    else:
-        page_png = source
-    image = Image.open(page_png).convert("RGB")
-    mask = dark_mask(image)
-    comps = components(mask)
-    rows = group_rows(comps)
-    glyphs: dict[str, list[dict[str, Any]]] = {}
-    row_records: list[dict[str, Any]] = []
-    row_idx = 0
-    for idx, spec in enumerate(ROW_SPECS):
-        consumed_rows, row_idx = _consume_spec_rows(mask, rows, row_idx, idx)
-        if not consumed_rows:
-            continue
-        x0 = min(item["row_box"][0] for item in consumed_rows)
-        y0 = min(item["row_box"][1] for item in consumed_rows)
-        x1 = max(item["row_box"][2] for item in consumed_rows)
-        y1 = max(item["row_box"][3] for item in consumed_rows)
-        row_crop = crop_save(image, (x0, y0, x1, y1), out_dir / "rows" / f"{idx:02d}_{spec['id']}.png", pad=24)
-        record: dict[str, Any] = {
-            "index": idx,
-            "id": spec["id"],
-            "kind": spec["kind"],
-            "crop": row_crop,
-            "physical_row_count": len(consumed_rows),
-            "source_row_indices": [item["source_row_index"] for item in consumed_rows],
-        }
-        if spec["kind"] == "glyphs":
-            groups = [(item["row"], group) for item in consumed_rows for group in item["groups"]]
-            labels = list(spec["labels"])
-            group_labels, inferred_missing_labels = _labels_for_groups(spec, len(groups))
-            record["detected_x_group_count"] = len(groups)
-            record["label_count"] = len(labels)
-            if group_labels != labels:
-                record["detected_label_sequence"] = group_labels
-                record["inferred_missing_labels"] = inferred_missing_labels
-            for label_idx, label in enumerate(group_labels):
-                if label_idx < len(groups):
-                    row, (gx0, gx1) = groups[label_idx]
-                    glyph = crop_save(
-                        image,
-                        (gx0, row["y0"], gx1, row["y1"]),
-                        out_dir / "glyph_bank" / slug(label) / f"{spec['id']}_{label_idx:02d}_{slug(label)}.png",
-                        pad=18,
-                    )
-                    glyph.update({"label": label, "row_id": spec["id"], "row_index": idx, "label_index": label_idx})
-                    glyphs.setdefault(label, []).append(glyph)
-                else:
-                    glyphs.setdefault(label, []).append({"label": label, "row_id": spec["id"], "missing_crop": True})
-            for label in inferred_missing_labels:
-                glyphs.setdefault(label, []).append({"label": label, "row_id": spec["id"], "missing_crop": True})
-        row_records.append(record)
-    available = {label for label, crops in glyphs.items() if any(not c.get("missing_crop") for c in crops)}
-    manifest = {
-        "schema_version": "handgen_worksheet_manifest_v1",
-        "writer_id": writer_id,
-        "generated_at": now_iso(),
-        "source_path": str(source),
-        "local_source": str(local_source),
-        "page_png": str(page_png),
-        "dpi": dpi,
-        "page_size": list(png_size(page_png)),
-        "detected_component_count": len(comps),
-        "detected_row_count": len(rows),
-        "used_row_count": len(row_records),
-        "rows": row_records,
-        "glyphs": glyphs,
-        "coverage": {"available_labels": sorted(available)},
-        "known_limits": [
-            "Automatic row-to-template assignment assumes the worksheet follows the expected MVP row order.",
-            "Punctuation/operator crops should be visually reviewed before relying on dense math output.",
-        ],
+def _read_specs(layout: Path | None) -> list[dict[str, Any]]:
+    if layout is None:
+        return ROW_SPECS
+    template = read_json(layout)
+    specs = template.get("rows") if isinstance(template, dict) else None
+    if not isinstance(specs, list) or not specs:
+        raise ValueError("Worksheet layout must contain a nonempty rows array")
+    for spec in specs:
+        if not isinstance(spec, dict) or not isinstance(spec.get("id"), str) or not spec["id"]:
+            raise ValueError("Each worksheet layout row needs an id")
+        labels = spec.get("labels")
+        if (
+            not isinstance(labels, list)
+            or not labels
+            or any(not isinstance(s, str) or not s.strip() for s in labels)
+        ):
+            raise ValueError("Each worksheet layout row needs a nonempty list of labels in writing order")
+    return specs
+
+
+def _assign_rows(
+    rows: list[dict[str, Any]], specs: list[dict[str, Any]], *, default_layout: bool
+) -> list[tuple[int, int]]:
+    counts = [len(row["boxes"]) for row in rows]
+
+    @lru_cache(None)
+    def match(section: int, start: int) -> tuple[tuple[int, int], ...] | None:
+        if start == len(rows) and (default_layout or section == len(specs)):
+            return ()
+        if section == len(specs):
+            return None
+        expected = len(specs[section]["labels"])
+        allowed = {expected}
+        if default_layout and specs[section]["id"] == "greek_symbols":
+            allowed.add(expected - 1)
+        count = 0
+        for stop in range(start + 1, len(rows) + 1):
+            count += counts[stop - 1]
+            if count > expected:
+                break
+            if count in allowed:
+                tail = match(section + 1, stop)
+                if tail is not None:
+                    return ((start, stop),) + tail
+        return None
+
+    assignment = match(0, 0)
+    if not assignment:
+        expected = ", ".join(f"{s['id']} ({len(s['labels'])})" for s in specs)
+        raise ValueError(
+            f"Cannot align worksheet. Detected glyph counts by physical row {counts}. "
+            f"Expected sections in order: {expected}. Separate touching marks or supply "
+            "--layout with the labels actually written."
+        )
+    return list(assignment)
+
+
+def _save_crop(
+    image: Image.Image, box: tuple[int, ...] | list[int], path: Path, base: Path, pad: int
+) -> dict[str, Any]:
+    x0, y0, x1, y1 = box
+    padded = (max(0, x0 - pad), max(0, y0 - pad), min(image.width, x1 + pad), min(image.height, y1 + pad))
+    # Pad with paper so a neighboring symbol never leaks into the crop.
+    crop = Image.new("L", (padded[2] - padded[0], padded[3] - padded[1]), 255)
+    crop.paste(image.crop(tuple(box)), (x0 - padded[0], y0 - padded[1]))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    crop.save(path)
+    return {
+        "path": str(path.relative_to(base)),
+        "bbox": list(padded),
+        "ink_bbox": list(box),
+        "width": crop.width,
+        "height": crop.height,
+        "sha256": sha_file(path),
     }
-    manifest_path = out_dir / "manifest.json"
-    write_json(manifest_path, manifest)
+
+
+def ingest_worksheet(
+    writer_id: str, source: Path, out_dir: Path, dpi: int = 220, *, layout: Path | None = None
+) -> dict[str, Any]:
+    if dpi <= 0:
+        raise ValueError("Worksheet DPI must be positive")
+    specs = _read_specs(layout)
+    out_dir = out_dir.resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    source_sha = sha_file(source)
+    recipe = json.dumps([2, source_sha, dpi, specs, layout is None], sort_keys=True).encode()
+    asset_dir = Path("assets") / hashlib.sha256(recipe).hexdigest()[:16]
+    snapshot_name = f"manifest-{asset_dir.name}.json"
+    # Build a complete bank before publishing it. A failed ingest leaves the
+    # preceding manifest and all the crops that it references intact.
+    with tempfile.TemporaryDirectory(dir=out_dir) as work_dir:
+        stage = Path(work_dir)
+        gray, source_size = _paper_image(source, stage, dpi)
+        image, comps, height, angle = _foreground(gray)
+        rows = group_rows(comps, height)
+        assignments = _assign_rows(rows, specs, default_layout=layout is None)
+        assets = stage / asset_dir
+        assets.mkdir(parents=True, exist_ok=True)
+        page = assets / "worksheet_page.png"
+        image.save(page)
+        glyphs: dict[str, list[dict[str, Any]]] = {}
+        row_records = []
+        for index, (start, stop) in enumerate(assignments):
+            spec = specs[index]
+            section = rows[start:stop]
+            boxes = [box for row in section for box in row["boxes"]]
+            labels, missing = _labels_for_groups(spec, len(boxes)) if layout is None else (spec["labels"], [])
+            section_box = (
+                min(b[0] for b in boxes),
+                min(b[1] for b in boxes),
+                max(b[2] for b in boxes),
+                max(b[3] for b in boxes),
+            )
+            key = f"{index:02d}_{slug(spec['id'])}"
+            row_crop = _save_crop(image, section_box, assets / "rows" / f"{key}.png", stage, pad=8)
+            record = {
+                "index": index,
+                "id": spec["id"],
+                "kind": "glyphs",
+                "crop": row_crop,
+                "physical_row_count": len(section),
+                "source_row_indices": list(range(start, stop)),
+                "detected_x_group_count": len(boxes),
+                "label_count": len(spec["labels"]),
+                "detected_label_sequence": labels,
+            }
+            if missing:
+                record["inferred_missing_labels"] = missing
+            row_records.append(record)
+            for j, (label, box) in enumerate(zip(labels, boxes, strict=True)):
+                name = slug(label)
+                path = assets / "glyph_bank" / name.lower() / f"{key}_{j:02d}_{name}.png"
+                # Include the mask's antialiased fringe before adding blank padding.
+                fringe = (
+                    max(0, box[0] - 1),
+                    max(0, box[1] - 1),
+                    min(image.width, box[2] + 1),
+                    min(image.height, box[3] + 1),
+                )
+                glyph = _save_crop(image, fringe, path, stage, pad=3)
+                glyph.update(label=label, row_id=spec["id"], row_index=index, label_index=j)
+                glyphs.setdefault(label, []).append(glyph)
+            for label in missing:
+                glyphs.setdefault(label, []).append(
+                    {"label": label, "row_id": spec["id"], "missing_crop": True}
+                )
+        available = {label for label, crops in glyphs.items() if any(c.get("path") for c in crops)}
+        required = {label for spec in specs for label in spec["labels"]}
+        manifest = {
+            "schema_version": "handgen_worksheet_manifest_v2",
+            "writer_id": writer_id,
+            "generated_at": now_iso(),
+            "source_path": str(source.resolve()),
+            "source_sha256": source_sha,
+            "snapshot_name": snapshot_name,
+            "local_source": str(source.resolve()),
+            "page_png": str(page.relative_to(stage)),
+            "dpi": dpi,
+            "source_page_size": list(source_size),
+            "page_size": list(image.size),
+            "deskew_degrees": angle,
+            "estimated_glyph_height": round(height, 2),
+            "detected_component_count": len(comps),
+            "detected_row_count": len(rows),
+            "used_row_count": len(row_records),
+            "rows": row_records,
+            "glyphs": glyphs,
+            "coverage": {
+                "available_labels": sorted(available),
+                "missing_labels": sorted(required - available),
+            },
+            "layout": str(layout) if layout else "default",
+            "known_limits": ["Sections and separated handwriting must follow the specified label order."],
+        }
+        # Use atomic file replacement on retry as well, allowing repair of a
+        # damaged crop without modifying assets of a different page or layout.
+        for path in assets.rglob("*.png"):
+            destination = out_dir / path.relative_to(stage)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            os.replace(path, destination)
+        write_json(stage / "manifest.json", manifest)
+        # Readers registered against this recipe remain consistent if another
+        # ingest publishes a different layout before the database transaction.
+        os.link(stage / "manifest.json", stage / snapshot_name)
+        os.replace(stage / snapshot_name, out_dir / snapshot_name)
+        os.replace(stage / "manifest.json", out_dir / "manifest.json")
+    return load_worksheet_manifest(out_dir / snapshot_name)
+
+
+def load_worksheet_manifest(path: Path) -> dict[str, Any]:
+    """Resolve portable v2 paths and pre-move absolute v1 paths at read time."""
+    manifest = read_json(path)
+    base = path.resolve().parent
+
+    def local_glyph(candidate: Path) -> Path:
+        # v1 on case-insensitive macOS could record "glyph_bank/A/..." while
+        # Git actually stored both letter cases in "glyph_bank/a/...".
+        parent = candidate.parent
+        if not candidate.is_file() and parent.parent.name == "glyph_bank" and parent.parent.is_dir():
+            for sibling in parent.parent.iterdir():
+                if sibling.name.casefold() == parent.name.casefold() and (sibling / candidate.name).is_file():
+                    return sibling / candidate.name
+        return candidate
+
+    def resolve(value: str, folder: str = "") -> str:
+        asset = Path(value)
+        if not asset.is_absolute():
+            return str(local_glyph(base / asset))
+        if folder and folder in asset.parts:
+            # The manifest's local bank takes precedence over a stale checkout.
+            old_directory = next(p for p in asset.parents if p.name == folder)
+            local = local_glyph(base / folder / asset.relative_to(old_directory))
+            if local.exists() or not asset.exists():
+                return str(local)
+        return str(asset)
+
+    for crops in manifest.get("glyphs", {}).values():
+        for crop in crops:
+            if crop.get("path"):
+                crop["path"] = resolve(crop["path"], "glyph_bank")
+    for row in manifest.get("rows", []):
+        crop = row.get("crop", {})
+        if crop.get("path"):
+            crop["path"] = resolve(crop["path"], "rows")
+    if manifest.get("page_png"):
+        page = Path(manifest["page_png"])
+        manifest["page_png"] = (
+            str(base / page.name)
+            if page.is_absolute() and (base / page.name).exists()
+            else resolve(str(page))
+        )
     return manifest
 
 
 def glyph_bank_from_manifest(manifest: dict[str, Any]) -> dict[str, list[Path]]:
-    bank: dict[str, list[Path]] = {}
+    bank = {}
     for label, crops in manifest.get("glyphs", {}).items():
         paths = []
         for crop in crops:
-            if not crop.get("missing_crop") and crop.get("path"):
-                paths.append(Path(crop["path"]))
+            if crop.get("missing_crop") or not crop.get("path"):
+                continue
+            path = Path(crop["path"])
+            if path.is_file() and (not crop.get("sha256") or sha_file(path) == crop["sha256"]):
+                paths.append(path)
         if paths:
             bank[label] = paths
     return bank

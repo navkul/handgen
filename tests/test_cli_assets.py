@@ -29,6 +29,20 @@ class CliAssetTests(unittest.TestCase):
             self.assertEqual(dst, (canonical_dir / "incoming.png").resolve())
             self.assertEqual(dst.read_bytes(), b"png")
 
+    def test_new_scan_with_colliding_name_keeps_the_previous_source(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            incoming = root / "scan.png"
+            library = root / "sheets"
+            incoming.write_bytes(b"first")
+            first = canonical_asset(incoming, library)
+            incoming.write_bytes(b"second")
+            second = canonical_asset(incoming, library)
+            self.assertNotEqual(first, second)
+            self.assertEqual(first.read_bytes(), b"first")
+            self.assertEqual(second.read_bytes(), b"second")
+            self.assertEqual(canonical_asset(incoming, library), second)
+
 
 if __name__ == "__main__":
     unittest.main()

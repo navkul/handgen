@@ -2,7 +2,12 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from handgen.render.ink import source_locked_token_ink, varied_rgba_ink
+from handgen.render.ink import (
+    soft_diffbrush_ink,
+    source_locked_token_ink,
+    trim_rgba_right,
+    varied_rgba_ink,
+)
 
 try:
     from PIL import Image, ImageDraw
@@ -12,6 +17,21 @@ except ModuleNotFoundError:
 
 
 class InkTests(unittest.TestCase):
+    def test_diffusion_paper_tone_does_not_bound_crop_and_trim_uses_retained_height(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            im = Image.new("L", (125, 54), 255)
+            draw = ImageDraw.Draw(im)
+            draw.rectangle((3, 1, 116, 52), fill=226)
+            draw.line((25, 24, 39, 29), fill=35, width=3)
+            draw.line((75, 12, 81, 44), fill=30, width=3)
+            im.save(root / "raw.png")
+            crop = soft_diffbrush_ink(root / "raw.png", root / "ink.png", pad=2)
+            self.assertLess(crop["width"], 68)
+            prefix = trim_rgba_right(root / "ink.png", root / "prefix.png", 38, pad=0)
+            self.assertLess(prefix["height"], 16)
+            self.assertGreater(prefix["height"], 5)
+
     def test_source_locked_token_ink_keeps_first_word_cluster(self):
         if Image is None or ImageDraw is None:
             raise unittest.SkipTest("Pillow is not installed")

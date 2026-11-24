@@ -2,12 +2,18 @@ __pycache__/
 *.py[cod]
 .DS_Store
 .cache/
+.pytest_cache/
+.ruff_cache/
 .venv/
 dist/
 build/
 *.egg-info/
 outputs/
+/error.log
 data/*.sqlite3
+data/*.sqlite3-*
+data/style_refs/*/prepared/
+data/style_refs/*/sources/
 
 # Model weights — keep code reproducible but don't push the binaries
 *.pt
@@ -15,3 +21,8 @@ data/*.sqlite3
 *.ckpt
 *.safetensors
 *.bin
+
+# Upstream benchmark inputs and temporary downloads stay local.
+/models/diffbrush/third_party_repo/test_data/
+/models/diffbrush/third_party_repo/data/wikitext103.te
+/models/vatrpp/download.tmp

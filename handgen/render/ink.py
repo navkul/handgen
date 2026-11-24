@@ -5,7 +5,6 @@ from typing import Any
 
 from ..utils import require_pillow_numpy, sha_file
 
-
 INK_RGB = (31, 36, 43)
 
 
@@ -124,13 +123,36 @@ def rgba_ink_profile(src: Path, alpha_threshold: int = 10) -> dict[str, Any]:
         "alpha_p75": round(float(np.quantile(alpha_values, 0.75)) if alpha_values.size else 0.0, 4),
         "alpha_p90": round(float(np.quantile(alpha_values, 0.90)) if alpha_values.size else 0.0, 4),
         "alpha_p95": round(float(np.quantile(alpha_values, 0.95)) if alpha_values.size else 0.0, 4),
-        "mean_rgb": [int(round(v)) for v in rgb_values.mean(axis=0).tolist()] if len(rgb_values) else list(INK_RGB),
+        "mean_rgb": [round(v) for v in rgb_values.mean(axis=0).tolist()] if len(rgb_values) else list(INK_RGB),
     }
 
 
 def soft_diffbrush_ink(src: Path, dst: Path, threshold: int = 236, pad: int = 3, alpha_scale: float = 1.0) -> dict[str, Any]:
-    return transparent_ink(src, dst, threshold=threshold, pad=pad, alpha_scale=alpha_scale) | {
-        "alpha_mode": "soft_diffbrush_alpha"
+    from PIL import ImageFilter
+
+    Image, np = require_pillow_numpy()
+    with Image.open(src) as source:
+        gray = source.convert("L")
+    pixels = np.asarray(gray, dtype=np.float32)
+    # A grayscale closing fills the thin dark strokes but retains the VAE's
+    # pale, rectangular background patches. Subtract that local paper tone.
+    paper = gray.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.MinFilter(9))
+    local_white = np.maximum(np.asarray(paper, dtype=np.float32), threshold * 0.85)
+    darkness = 255 * (1 - pixels / local_white)
+    alpha = np.clip((darkness - (255 - threshold)) * (255 / threshold) * alpha_scale, 0, 255)
+    alpha_image = Image.fromarray(alpha.astype("uint8"))
+    bounds = alpha_image.point(lambda a: 255 if a > 10 else 0).getbbox()
+    if bounds:
+        x0, y0, x1, y1 = bounds
+        alpha_image = alpha_image.crop((max(0, x0-pad), max(0, y0-pad),
+                                        min(gray.width, x1+pad), min(gray.height, y1+pad)))
+    rgba = Image.new("RGBA", alpha_image.size, INK_RGB)
+    rgba.putalpha(alpha_image)
+    dst.parent.mkdir(parents=True, exist_ok=True)
+    rgba.save(dst)
+    return {
+        "path": str(dst), "width": rgba.width, "height": rgba.height, "sha256": sha_file(dst),
+        "ink_rgb": list(INK_RGB), "alpha_mode": "local_paper_diffbrush_alpha", "alpha_scale": alpha_scale,
     }
 
 
@@ -242,6 +264,14 @@ def trim_rgba_right(src: Path, dst: Path, right_x: int, pad: int = 4) -> dict[st
     image = Image.open(src).convert("RGBA")
     crop_right = max(1, min(image.width, int(right_x) + pad))
     out = image.crop((0, 0, crop_right, image.height))
+    # Removing a suffix can also remove the tallest ascender or the only
+    # descender in the line. Size the retained words from their own ink.
+    bounds = out.getchannel("A").point(lambda a: 255 if a > 10 else 0).getbbox()
+    ink_box = (0, 0, out.width, out.height)
+    if bounds is not None:
+        x0, y0, x1, y1 = bounds
+        ink_box = (max(0, x0 - 2), max(0, y0 - 2), min(out.width, x1 + 2), min(out.height, y1 + 2))
+        out = out.crop(ink_box)
     dst.parent.mkdir(parents=True, exist_ok=True)
     out.save(dst)
     return {
@@ -251,6 +281,7 @@ def trim_rgba_right(src: Path, dst: Path, right_x: int, pad: int = 4) -> dict[st
         "sha256": sha_file(dst),
         "trimmed_from": str(src),
         "trim_right_x": crop_right,
+        "ink_crop_box": list(ink_box),
     }
 
 

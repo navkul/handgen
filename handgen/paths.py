@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
-
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[1]
 RESEARCH_ROOT = PACKAGE_ROOT.parent
-DATA_DIR = PACKAGE_ROOT / "data"
+DATA_DIR = Path(os.environ.get("HANDGEN_DATA_DIR", PACKAGE_ROOT / "data")).expanduser().resolve()
 OUTPUTS_DIR = PACKAGE_ROOT / "outputs"
 DB_PATH = DATA_DIR / "handgen.sqlite3"
 

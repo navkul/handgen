@@ -1,9 +1,9 @@
-import unittest
 import tempfile
+import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from handgen.render.document import _carrier_for_line, _chunk_carrier
+from handgen.render.carriers import _carrier_for_line, _chunk_carrier
 
 
 class CarrierPlanningTests(unittest.TestCase):

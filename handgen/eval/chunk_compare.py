@@ -24,15 +24,12 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-import xml.etree.ElementTree as ET
 
 from PIL import Image, ImageDraw, ImageFont
 
 from .. import db
 from ..chunking import STRATEGIES, get_strategy
 from ..render import document as document_mod
-from ..render import math as math_mod
-
 
 DEFAULT_STRATEGIES = ("current", "balanced_dp", "punctuation_first", "variable_length_sampling")
 
@@ -53,22 +50,6 @@ class BenchmarkCase:
     id: str
     kind: str
     text: str
-
-
-def _placeholder_png(svg_path: Path) -> Path:
-    """SVG→PNG stub so the harness works without librsvg installed.
-
-    The chunk comparison only consumes the styled prose crops on disk; the
-    full-document PNG produced by the renderer is irrelevant here, so we
-    can short-circuit ``render_svg_to_png`` with a blank canvas.
-    """
-    png_path = svg_path.with_suffix(".png")
-    png_path.parent.mkdir(parents=True, exist_ok=True)
-    root = ET.fromstring(svg_path.read_text(encoding="utf-8"))
-    width = max(1, int(round(float(root.attrib.get("width", "8")))))
-    height = max(1, int(round(float(root.attrib.get("height", "8")))))
-    Image.new("RGBA", (width, height), (255, 255, 255, 0)).save(png_path)
-    return png_path
 
 
 def _load_cases(path: Path) -> list[BenchmarkCase]:
@@ -124,27 +105,6 @@ def _multiline(
     return y
 
 
-def _render_preview_from_manifest(manifest: dict[str, Any], output_path: Path) -> Path:
-    width = 1500
-    height = 1900
-    canvas = Image.new("RGBA", (width, height), GRID_BG)
-    for span in manifest.get("spans", []):
-        bbox = span["bbox"]
-        x = int(round(bbox["x"]))
-        y = int(round(bbox["y"]))
-        w = max(1, int(round(bbox["width"])))
-        h = max(1, int(round(bbox["height"])))
-        if span["type"] == "prose":
-            asset_path = Path(span["diffbrush"]["styled_crop"]["path"])
-        else:
-            asset_path = Path(span["math"]["paths"]["png"])
-        tile = Image.open(asset_path).convert("RGBA").resize((w, h), Image.Resampling.LANCZOS)
-        canvas.alpha_composite(tile, (x, y))
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    canvas.save(output_path)
-    return output_path
-
-
 def _crop_preview(preview_path: Path, manifest: dict[str, Any], output_path: Path) -> Path:
     image = Image.open(preview_path).convert("RGBA")
     xs: list[int] = []
@@ -152,6 +112,8 @@ def _crop_preview(preview_path: Path, manifest: dict[str, Any], output_path: Pat
     xe: list[int] = []
     ye: list[int] = []
     for span in manifest.get("spans", []):
+        if "bbox" not in span or span.get("page", 1) != 1:
+            continue
         bbox = span["bbox"]
         xs.append(int(bbox["x"]))
         ys.append(int(bbox["y"]))
@@ -280,10 +242,6 @@ def run_comparison(
         raise RuntimeError(f"benchmark file {cases_path} contains no cases")
     db.init_db()
     output_dir.mkdir(parents=True, exist_ok=True)
-    # Skip the librsvg full-page render; we only need the styled crops.
-    document_mod.render_svg_to_png = _placeholder_png
-    math_mod.render_svg_to_png = _placeholder_png
-
     summary: dict[str, dict[str, Any]] = {}
     for case in cases:
         case_summary: dict[str, Any] = {}
@@ -298,11 +256,12 @@ def run_comparison(
                 writer_id,
                 source_path.resolve(),
                 render_dir.resolve(),
+                prose_mode="diffbrush",
                 chunking_strategy=strategy,
                 chunking_strategy_name=strategy_name,
             )
             manifest_path = render_dir / "manifest.json"
-            preview_path = _render_preview_from_manifest(manifest, render_dir / "preview_full.png")
+            preview_path = Path(manifest["outputs"]["png"])
             crop_path = _crop_preview(preview_path, manifest, render_dir / "preview_crop.png")
             if not manifest_path.exists():
                 raise RuntimeError(f"Expected manifest was not written: {manifest_path}")
