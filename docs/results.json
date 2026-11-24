@@ -1061,5 +1061,446 @@
         "crop_ocr": "odd."
       }
     ]
+  },
+  "odd_integer_proof_combined": {
+    "source": "examples/odd_integer_proof.txt",
+    "source_file_sha256": "f4f0c7f6ea89a1876b08ea1d72a1be39a7d52da250510f2c2afa1f4ca80139f3",
+    "writer_id": "writer_001",
+    "prose_mode": "auto",
+    "render_seed": 732,
+    "adapter_sha256": "e40ad156ec90004087df1ebdd4bc5ba8b8ec454eadec952319e7d924b59a3b46",
+    "carrier_layout": true,
+    "require_verified": true,
+    "prose_chunking": "balanced_dp",
+    "preview": "docs/assets/odd-integer-proof-combined.png",
+    "preview_sha256": "6f6e613ee7164bde7d588eb1c50c68f12f00f503527f39bb7bf3303303f16746",
+    "route_counts": {
+      "diffbrush_carrier_prose": 2,
+      "worksheet_symbol_math": 4,
+      "diffbrush_ocr_verified_prose_token": 5,
+      "diffbrush_verified_crop": 3,
+      "worksheet_prose": 1,
+      "vatr_word": 2
+    },
+    "evidence_counts": {
+      "ocr_match": 12,
+      "worksheet_labels": 5
+    },
+    "quality_gates": {
+      "source_contract_passed": true,
+      "all_visible_spans_supported": true,
+      "passed": false,
+      "all_placements_have_ink": true,
+      "page_prose_readback_exact": false
+    },
+    "page_ocr": {
+      "pages": 1,
+      "character_edits": 1,
+      "target_characters": 118,
+      "exact_regions": 8
+    },
+    "regions": [
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "Let",
+        "actual": "Let",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "be any integer.",
+        "actual": "be any integer.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "Divide",
+        "actual": "Divide",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "by two.",
+        "actual": "by two.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "The quotient is",
+        "actual": "The quatient is",
+        "character_edit_distance": 1
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "with remainder one.",
+        "actual": "with remainder one.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "A remainder of one means it is odd.",
+        "actual": "A remainder of one means it is odd.",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "Thus",
+        "actual": "Thus",
+        "character_edit_distance": 0
+      },
+      {
+        "page": 1,
+        "reader": "vision",
+        "expected": "is always odd.",
+        "actual": "is always odd.",
+        "character_edit_distance": 0
+      }
+    ],
+    "placements": [
+      {
+        "text": "Let",
+        "line_index": 0,
+        "route": "diffbrush_carrier_prose",
+        "evidence": "ocr_match",
+        "crop_ocr": "Let"
+      },
+      {
+        "text": " ",
+        "line_index": 0,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "n",
+        "line_index": 0,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 0,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "be any integer.",
+        "line_index": 0,
+        "route": "diffbrush_carrier_prose",
+        "evidence": "ocr_match",
+        "crop_ocr": "be any integer."
+      },
+      {
+        "text": "Divide",
+        "line_index": 1,
+        "route": "diffbrush_ocr_verified_prose_token",
+        "evidence": "ocr_match",
+        "crop_ocr": "Divide"
+      },
+      {
+        "text": " ",
+        "line_index": 1,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "2n + 1",
+        "line_index": 1,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "2",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "2"
+            ],
+            "source_sha256": [
+              "4a4be210815dc026cfb1dd888372009325cc749c604946f774d564d56f984b3a"
+            ]
+          },
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          },
+          {
+            "source_character": "+",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "+"
+            ],
+            "source_sha256": [
+              "4f41804ad0244be54a18c6baea35ac863485da6a97bea4a22586b1b0268e0349"
+            ]
+          },
+          {
+            "source_character": "1",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "1"
+            ],
+            "source_sha256": [
+              "6040a607858570e37504f23ce1921e625422e6a10beea0e71f1e823dc72ebf09"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 1,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "by two.",
+        "line_index": 1,
+        "route": "diffbrush_ocr_verified_prose_token",
+        "evidence": "ocr_match",
+        "crop_ocr": "by two."
+      },
+      {
+        "text": "The quotient is",
+        "line_index": 2,
+        "route": "diffbrush_ocr_verified_prose_token",
+        "evidence": "ocr_match",
+        "crop_ocr": "The quotient is"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "n",
+        "line_index": 2,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "with remainder",
+        "line_index": 2,
+        "route": "diffbrush_verified_crop",
+        "evidence": "ocr_match",
+        "crop_ocr": "with remainder"
+      },
+      {
+        "text": " ",
+        "line_index": 2,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "one.",
+        "line_index": 2,
+        "route": "worksheet_prose",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "o",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "o"
+            ],
+            "source_sha256": [
+              "a00331bf38ff0e3d7d1a1169ba632dedd4cfbaf0bf9b9646a6af78381d9e0c66"
+            ]
+          },
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          },
+          {
+            "source_character": "e",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "e"
+            ],
+            "source_sha256": [
+              "586ca67defc3c6e5895986460531a1c730d0d24dbee55943319562f948afbdfb"
+            ]
+          },
+          {
+            "source_character": ".",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "."
+            ],
+            "source_sha256": [
+              "db300f51e446c97985d4b932bae6b3177f0775ce7d8bea4fd5957bda75bd0f3a"
+            ]
+          }
+        ]
+      },
+      {
+        "text": "A",
+        "line_index": 3,
+        "route": "diffbrush_verified_crop",
+        "evidence": "ocr_match",
+        "crop_ocr": "A"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "remainder",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "remainder"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "of one means it is",
+        "line_index": 3,
+        "route": "diffbrush_verified_crop",
+        "evidence": "ocr_match",
+        "crop_ocr": "of one means it is"
+      },
+      {
+        "text": " ",
+        "line_index": 3,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "odd.",
+        "line_index": 3,
+        "route": "vatr_word",
+        "evidence": "ocr_match",
+        "crop_ocr": "odd."
+      },
+      {
+        "text": "Thus",
+        "line_index": 4,
+        "route": "diffbrush_ocr_verified_prose_token",
+        "evidence": "ocr_match",
+        "crop_ocr": "Thus"
+      },
+      {
+        "text": " ",
+        "line_index": 4,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "2n + 1",
+        "line_index": 4,
+        "route": "worksheet_symbol_math",
+        "evidence": "worksheet_labels",
+        "glyphs": [
+          {
+            "source_character": "2",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "2"
+            ],
+            "source_sha256": [
+              "4a4be210815dc026cfb1dd888372009325cc749c604946f774d564d56f984b3a"
+            ]
+          },
+          {
+            "source_character": "n",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "n"
+            ],
+            "source_sha256": [
+              "ad7572d8abfcd95ec4dd1274181a6ecb6f44c2c7876cb5ada930a4cc7686c9da"
+            ]
+          },
+          {
+            "source_character": "+",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "+"
+            ],
+            "source_sha256": [
+              "4f41804ad0244be54a18c6baea35ac863485da6a97bea4a22586b1b0268e0349"
+            ]
+          },
+          {
+            "source_character": "1",
+            "route": "worksheet_glyph_bank_symbol",
+            "component_labels": [
+              "1"
+            ],
+            "source_sha256": [
+              "6040a607858570e37504f23ce1921e625422e6a10beea0e71f1e823dc72ebf09"
+            ]
+          }
+        ]
+      },
+      {
+        "text": " ",
+        "line_index": 4,
+        "route": "source_whitespace",
+        "evidence": "whitespace"
+      },
+      {
+        "text": "is always odd.",
+        "line_index": 4,
+        "route": "diffbrush_ocr_verified_prose_token",
+        "evidence": "ocr_match",
+        "crop_ocr": "is always odd."
+      }
+    ]
   }
 }

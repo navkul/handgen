@@ -3,6 +3,7 @@ name = "handgen"
 version = "0.1.0"
 description = "Render local handwriting samples, model-generated prose and worksheet math to paginated SVG and PNG."
 readme = "README.md"
+license = "MIT"
 authors = [
   { name = "Arnav Kulkarni" },
   { name = "Felix Tuchscherer" },
@@ -47,7 +48,7 @@ Repository = "https://github.com/navkul/handgen"
 Documentation = "https://github.com/navkul/handgen/blob/main/docs/pipeline.md"
 
 [build-system]
-requires = ["setuptools>=69"]
+requires = ["setuptools>=77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
